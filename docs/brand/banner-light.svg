@@ -15,15 +15,15 @@
     <text x="164" y="141" fill="#1f2328" font-size="74" font-weight="600" letter-spacing="-4">Bring AI<tspan fill="#176b43">_</tspan></text>
     <text x="64" y="218" fill="#1f2328" font-size="32" letter-spacing="-1">Local inference bridge for web apps.</text>
     <text x="64" y="255" fill="#59636e" font-size="18">Connect an account. Approve an origin. Request inference.</text>
-    
+
     <rect x="64" y="310" width="304" height="90" rx="2" fill="#ffffff" stroke="#d1d9e0"/>
     <text x="86" y="346" fill="#1f2328" font-size="22">web app</text>
     <text x="86" y="376" fill="#59636e" font-size="16">prompt + context</text>
-    
+
     <rect x="488" y="310" width="304" height="90" rx="2" fill="#ffffff" stroke="#176b43"/>
     <text x="510" y="346" fill="#176b43" font-size="22">127.0.0.1:4360</text>
     <text x="510" y="376" fill="#59636e" font-size="16">permissioned connector</text>
-    
+
     <rect x="912" y="310" width="304" height="90" rx="2" fill="#ffffff" stroke="#d1d9e0"/>
     <text x="934" y="346" fill="#1f2328" font-size="22">AI provider</text>
     <text x="934" y="376" fill="#59636e" font-size="16">your connected account</text>

@@ -32,7 +32,7 @@ function mark({ ink, accent }) {
   </g>`;
 }
 function svg(width, height, title, description, body) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title description"><title id="title">${title}</title><desc id="description">${description}</desc>${body}</svg>\n`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title description"><title id="title">${title}</title><desc id="description">${description}</desc>${body}</svg>\n`.replace(/[ \t]+$/gm, "");
 }
 function bannerBody(theme) {
   const c = themes[theme];
