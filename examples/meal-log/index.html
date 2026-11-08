@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Daylight · Bring AI example</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <nav>
+      <a class="logo" href="/">◒ &nbsp; daylight</a
+      ><span class="badge">INDEPENDENT APP · CONNECTOR DEMO</span
+      ><button id="connect" class="secondary">Connect my AI ↗</button>
+    </nav>
+    <main>
+      <div class="eyebrow">A LITTLE LESS TRACKING. A LITTLE MORE LIVING.</div>
+      <h1>Good food.<br /><em>Clearer picture.</em></h1>
+      <p class="intro">
+        A tiny meal journal with intelligence from your own AI connection.
+      </p>
+      <div class="workspace">
+        <section class="input-card">
+          <div class="step">01 &nbsp; YOUR MEAL</div>
+          <label for="meal">What was on your plate?</label
+          ><textarea id="meal">
+A bowl of Greek yogurt, one banana, a handful of blueberries and a tablespoon of honey.</textarea
+          ><label for="photo" class="photo-label"
+            >＋ Add a meal photo <span>optional · under 2 MB</span></label
+          ><input
+            type="file"
+            id="photo"
+            accept="image/jpeg,image/png,image/webp"
+          />
+          <div id="photo-name"></div>
+          <button id="generate" disabled>
+            Estimate with my AI <span>↗</span>
+          </button>
+          <p class="helper">
+            Your app prepares the context. Your AI supplies the estimate.
+          </p>
+        </section>
+        <section class="result-card">
+          <div class="step">02 &nbsp; YOUR ESTIMATE</div>
+          <div id="result">
+            <div class="sun">◒</div>
+            <h2>A clearer picture, in a moment.</h2>
+            <p>Connect your AI, then describe a meal or add a photo.</p>
+          </div>
+        </section>
+      </div>
+      <div id="pairing" hidden>
+        <h3>Approve Daylight in Bring AI</h3>
+        <p>Compare this code, then choose Allow app in the desktop window.</p>
+        <strong id="code"></strong><a id="open-connector">Open Bring AI ↗</a>
+      </div>
+      <p id="status" role="status">
+        Connect once. Your AI credentials stay on this computer.
+      </p>
+      <div class="flow">
+        <div>
+          <span>01</span> The app’s server<br /><b
+            >Context &amp; business logic</b
+          >
+        </div>
+        <i>→</i>
+        <div>
+          <span>02</span> Your browser<br /><b>Permissioned connection</b>
+        </div>
+        <i>→</i>
+        <div>
+          <span>03</span> Bring AI on your laptop<br /><b
+            >Your Codex or ChatGPT access</b
+          >
+        </div>
+      </div>
+      <footer>
+        This is a connector example. Estimates can be wrong; review before
+        using.<br />The connector stores no meal journal. Any saved data would
+        belong to this app.
+      </footer>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

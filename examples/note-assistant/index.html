@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Margin · Bring AI example</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body class="notes">
+    <nav>
+      <a class="logo" href="/">▤ &nbsp; margin</a
+      ><span class="badge">A SECOND INDEPENDENT APP</span
+      ><button id="connect" class="secondary">Connect my AI ↗</button>
+    </nav>
+    <main>
+      <div class="eyebrow">MAKE SPACE FOR THE IMPORTANT PART.</div>
+      <h1>Messy notes.<br /><em>Clear next steps.</em></h1>
+      <p class="intro">
+        A different app. The same AI connection. Its own permission.
+      </p>
+      <div class="workspace">
+        <section class="input-card">
+          <div class="step">01 &nbsp; YOUR NOTE</div>
+          <label for="note">What’s on your mind?</label
+          ><textarea id="note">
+We agreed to ship the landing page on Friday. Maya will finish the copy by Wednesday. I need to review the signup flow and book a demo with our first customer.</textarea
+          ><button id="generate" disabled>
+            Find the next steps <span>↗</span>
+          </button>
+        </section>
+        <section class="result-card">
+          <div class="step">02 &nbsp; A CLEARER PLAN</div>
+          <div id="result">
+            <div class="sun">▤</div>
+            <h2>From scattered to focused.</h2>
+            <p>Connect your AI, then make sense of a note.</p>
+          </div>
+        </section>
+      </div>
+      <div id="pairing" hidden>
+        <h3>Approve Margin in Bring AI</h3>
+        <p>Compare this code with the desktop window.</p>
+        <strong id="code"></strong><a id="open-connector">Open Bring AI ↗</a>
+      </div>
+      <p id="status" role="status">
+        Each app needs its own approval. Credentials stay in Bring AI.
+      </p>
+      <footer>
+        Only this note is sent to your AI. The app’s workflow stays on its
+        server.
+      </footer>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

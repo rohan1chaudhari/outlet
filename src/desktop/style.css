@@ -1,0 +1,380 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #f8f9f7;
+  color: #202a25;
+  font:
+    14px -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+button,
+select {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  border: 1px solid #1d4e37;
+  border-radius: 8px;
+  padding: 11px 16px;
+  background: #1d4e37;
+  color: white;
+  font-weight: 600;
+}
+button:hover {
+  filter: brightness(1.1);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.secondary {
+  background: transparent;
+  color: #294435;
+  border-color: #d4dcd5;
+}
+.text-button {
+  background: none;
+  border: 0;
+  color: #245e40;
+  padding: 5px 0;
+  font-size: 12px;
+  white-space: nowrap;
+}
+aside {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 223px;
+  padding: 32px 22px;
+  background: #eef1eb;
+  border-right: 1px solid #dce3da;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 23px;
+  letter-spacing: -1px;
+  font-weight: 700;
+}
+.brand sup {
+  font-size: 13px;
+  color: #85917f;
+}
+.mark {
+  background: #1e5138;
+  color: white;
+  border-radius: 9px;
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  font-size: 25px;
+}
+.tagline {
+  font-size: 13px;
+  color: #69756b;
+  line-height: 1.65;
+  margin: 24px 0 38px;
+}
+.nav {
+  padding: 12px;
+  border-radius: 7px;
+  font-weight: 600;
+}
+.nav.active {
+  background: #dde7db;
+  color: #2d5c3d;
+}
+.aside-bottom {
+  position: absolute;
+  bottom: 26px;
+  left: 22px;
+  font-size: 11px;
+  color: #5b6c5d;
+}
+.aside-bottom p {
+  margin: 7px 0 21px;
+  color: #82907e;
+}
+.aside-bottom small {
+  display: block;
+  margin-top: 20px;
+  color: #8d9787;
+}
+.aside-bottom label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-dot {
+  display: inline-block;
+  background: #6d9f66;
+  border-radius: 50%;
+  width: 6px;
+  height: 6px;
+  margin-right: 5px;
+}
+main {
+  margin-left: 223px;
+  padding: 39px 39px 22px;
+  max-width: 1200px;
+}
+header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 29px;
+}
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  color: #748570;
+  font-weight: 600;
+}
+h1 {
+  font-size: 36px;
+  letter-spacing: -1.4px;
+  line-height: 1.13;
+  font-weight: 600;
+  margin: 15px 0;
+}
+header p {
+  color: #768172;
+  font-size: 13px;
+  margin-bottom: 0;
+}
+header button {
+  font-size: 12px;
+  padding: 9px 12px;
+}
+section {
+  margin: 26px 0;
+}
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+h2 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+.subtle {
+  font-size: 11px;
+  color: #939b8c;
+}
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  background: #e9ede5;
+  border-radius: 4px;
+  font-size: 11px;
+  margin-left: 7px;
+  color: #71816b;
+}
+.connection-card,
+.profile,
+.grant,
+.pairing {
+  background: #fff;
+  border: 1px solid #dfe5da;
+  border-radius: 10px;
+  padding: 17px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 9px;
+}
+h3 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+p {
+  line-height: 1.5;
+}
+.connection-card p,
+.profile p,
+.grant p {
+  font-size: 11px;
+  color: #89927f;
+  margin: 0;
+}
+.connection-card button {
+  font-size: 11px;
+  padding: 11px;
+}
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+.account-icon {
+  font-size: 27px;
+  display: grid;
+  place-items: center;
+  background: #eff2ec;
+  border-radius: 9px;
+  width: 41px;
+  height: 41px;
+  color: #60765a;
+}
+.existing {
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  font-size: 11px;
+  color: #829078;
+  padding: 5px 3px;
+}
+.existing span {
+  flex: 1;
+}
+.profile {
+  font-size: 12px;
+  background: #f4f7f1;
+  padding: 12px;
+}
+.profile select {
+  padding: 6px;
+  border: 1px solid #d6dfce;
+  background: white;
+  border-radius: 5px;
+  max-width: 170px;
+}
+.pill {
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  padding: 5px 7px;
+  background: #e9f0e2;
+  color: #4f7045;
+  border-radius: 4px;
+}
+.amber {
+  background: #fff0d4;
+  color: #9b6818;
+}
+.pairing {
+  display: block;
+  border-color: #d5b56d;
+  background: #fffcf5;
+}
+.origin {
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  font-weight: 600;
+  color: #254b33;
+  margin-bottom: 8px;
+}
+.pairing p {
+  color: #7d806d;
+  font-size: 12px;
+  margin: 8px 0;
+}
+.pairing code {
+  font-size: 20px;
+  letter-spacing: 4px;
+  color: #976b24;
+}
+.pairing-controls {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.pairing-controls select {
+  padding: 9px;
+  background: white;
+  border: 1px solid #e0d8bf;
+  border-radius: 6px;
+  font-size: 11px;
+  max-width: 210px;
+}
+.pairing-controls button {
+  padding: 9px 13px;
+  font-size: 12px;
+}
+.empty {
+  border: 1px dashed #d8dfd0;
+  border-radius: 8px;
+  padding: 20px;
+  color: #9aa28e;
+  font-size: 12px;
+  text-align: center;
+}
+.grant {
+  padding: 13px 16px;
+}
+.grant .origin {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.grant .icon {
+  font-size: 22px;
+  color: #7d9271;
+}
+.activity-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e9df;
+  font-size: 11px;
+  color: #7e8b72;
+}
+.activity-row span:first-child {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.activity-row .completed {
+  color: #3f7443;
+}
+.activity-row .failed,
+.activity-row .cancelled {
+  color: #a56e31;
+}
+footer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 27px;
+  padding-top: 18px;
+  border-top: 1px solid #e1e5da;
+  color: #94a089;
+}
+footer > span {
+  font-size: 25px;
+}
+footer p {
+  font-size: 10px;
+  line-height: 1.7;
+  margin: 0;
+}
+#notice {
+  background: #fff2dd;
+  color: #856225;
+  padding: 13px;
+  border: 1px solid #e9d3a6;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+button:focus-visible,
+select:focus-visible {
+  outline: 3px solid #97b88a;
+  outline-offset: 3px;
+}
+[hidden] {
+  display: none !important;
+}

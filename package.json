@@ -1,0 +1,80 @@
+{
+  "name": "bring-ai-connector",
+  "version": "0.1.0",
+  "description": "A user-owned, extension-free AI connector for independent web apps",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "src/desktop/main.mjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/*.test.mjs",
+    "demo": "node scripts/demo-server.mjs",
+    "build": "electron-builder --mac dmg zip",
+    "build:dir": "electron-builder --dir",
+    "build:windows": "electron-builder --win nsis",
+    "build:linux": "electron-builder --linux AppImage"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "jose": "6.2.15"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "build": {
+    "appId": "org.bringai.connector",
+    "productName": "Bring AI",
+    "artifactName": "Bring-AI-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "LICENSE",
+      "NOTICE"
+    ],
+    "asar": true,
+    "protocols": [
+      {
+        "name": "Bring AI connection",
+        "schemes": [
+          "bringai"
+        ]
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "identity": null,
+      "icon": "build/icon.icns"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility",
+      "icon": "build/icon.png"
+    }
+  },
+  "author": "Bring AI contributors"
+}
