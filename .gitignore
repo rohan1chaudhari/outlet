@@ -6,3 +6,5 @@ dist/
 .DS_Store
 .runtime/
 coverage/
+.playwright-cli/
+output/

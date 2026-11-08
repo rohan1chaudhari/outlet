@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Bring AI · brand assets</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #e9edf0;
+        color: #1f2328;
+        font:
+          13px/1.6 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+      }
+      main {
+        max-width: 1328px;
+        padding: 32px 24px;
+        margin: auto;
+      }
+      h1 {
+        font-size: 19px;
+        font-weight: 500;
+        margin: 0 0 8px;
+      }
+      p {
+        color: #59636e;
+        margin: 0 0 28px;
+      }
+      h2 {
+        font-size: 11px;
+        letter-spacing: 1.4px;
+        font-weight: 500;
+        text-transform: uppercase;
+        margin: 28px 0 12px;
+      }
+      .banner {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .identity {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .tile {
+        padding: 28px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        overflow: hidden;
+      }
+      .dark {
+        background: #0d1117;
+      }
+      .light {
+        background: #f6f8fa;
+      }
+      .tile img {
+        max-width: 100%;
+      }
+      .mark {
+        width: 88px;
+        height: 88px;
+      }
+      .wordmark {
+        width: 390px;
+        height: auto;
+      }
+      #social-preview {
+        display: block;
+        width: 1200px;
+        height: 630px;
+        max-width: none;
+      }
+      .social {
+        overflow: auto;
+      }
+      .note {
+        font-size: 11px;
+        margin-top: 20px;
+      }
+      @media (max-width: 700px) {
+        .identity {
+          grid-template-columns: 1fr;
+        }
+        .tile {
+          padding: 18px;
+        }
+        .wordmark {
+          width: 240px;
+        }
+        .mark {
+          width: 54px;
+          height: 54px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Bring AI / repository identity</h1>
+      <p>
+        Local inference bridge for web apps. Vector assets, system monospace,
+        two color schemes.
+      </p>
+      <h2>README · dark</h2>
+      <img
+        id="banner-dark"
+        class="banner"
+        src="banner-dark.svg"
+        alt="Bring AI dark README banner"
+      />
+      <h2>README · light</h2>
+      <img
+        id="banner-light"
+        class="banner"
+        src="banner-light.svg"
+        alt="Bring AI light README banner"
+      />
+      <h2>Mark + wordmark</h2>
+      <div class="identity">
+        <div class="tile dark">
+          <img
+            id="mark"
+            class="mark"
+            src="mark-dark.svg"
+            alt="Bring AI bracket and arrow mark"
+          /><img
+            class="wordmark"
+            src="wordmark-dark.svg"
+            alt="Bring AI wordmark on dark"
+          />
+        </div>
+        <div class="tile light">
+          <img
+            class="wordmark"
+            src="wordmark-light.svg"
+            alt="Bring AI wordmark on light"
+          />
+        </div>
+      </div>
+      <h2>Repository social preview · 1200 × 630</h2>
+      <div class="social">
+        <img
+          id="social-preview"
+          src="social-preview.svg"
+          alt="Bring AI repository preview"
+        />
+      </div>
+      <p class="note">
+        The README uses scheme-aware SVGs. The social preview has a PNG export
+        for repository metadata.
+      </p>
+    </main>
+  </body>
+</html>

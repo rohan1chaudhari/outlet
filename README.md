@@ -1,8 +1,22 @@
-# Bring AI
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/banner-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/brand/banner-light.svg">
+  <img alt="Bring AI — local inference bridge for web apps. Open-source desktop connector and browser SDK." src="docs/brand/banner-light.svg" width="1280" height="480">
+</picture>
 
-**Pay for the software. Bring your own AI.**
+<p align="center">
+  <a href="#run-from-source">Get started</a> ·
+  <a href="#add-it-to-an-app">Browser SDK</a> ·
+  <a href="docs/protocol.md">Protocol</a> ·
+  <a href="SECURITY.md">Security</a> ·
+  <a href="CONTRIBUTING.md">Contributing</a>
+</p>
 
-A desktop connector and small browser SDK that let independent web apps request intelligence from a user's own AI connection. No browser extension. The app keeps its backend, tools, database, business logic and pricing.
+Bring AI connects web applications to a user's AI account through a local, permissioned service. It includes a desktop connection manager and a dependency-free browser SDK. App backends retain their tools, state and agent loops.
+
+**Alpha:** existing Codex is verified on macOS. Direct ChatGPT sign-in is experimental. [Tested behavior and limitations](docs/validation.md).
+
+## How it connects
 
 ```mermaid
 sequenceDiagram
@@ -94,7 +108,7 @@ Electron bundles the desktop runtime. Provider credentials are encrypted using t
 
 The first release target is desktop Chrome/Chromium on macOS. Windows/Linux packaging configuration and CI are included but are unverified locally. Firefox, Safari, mobile, background jobs and a signed auto-updater are not claimed. An extension transport can be added if browser compatibility evidence warrants it; it is not required by this implementation.
 
-Apache-2.0. See [CONTRIBUTING.md](CONTRIBUTING.md). Source and build are local; no public GitHub repository, package or download service has been published.
+Apache-2.0. See [CONTRIBUTING.md](CONTRIBUTING.md). Reusable logos, banners and the repository preview are in [docs/brand](docs/brand/README.md). Source and build are local; no public GitHub repository, package or download service has been published.
 
 ## Provider references
 

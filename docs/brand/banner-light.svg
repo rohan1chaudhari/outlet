@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="480" viewBox="0 0 1280 480" role="img" aria-labelledby="title description"><title id="title">Bring AI — local inference bridge for web apps</title><desc id="description">An open-source desktop connector and browser SDK. Web apps exchange inference requests with a local permissioned connector and the user's connected AI provider. App tools remain on the server.</desc><defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#e8edf1" stroke-width="0.6"/></pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L7 5L2 9" fill="none" stroke="#59636e" stroke-width="1.6"/></marker>
+  </defs>
+  <rect width="1280" height="480" fill="#f6f8fa"/>
+  <rect width="1280" height="480" fill="url(#grid)"/>
+  <rect x="0.5" y="0.5" width="1279" height="479" fill="none" stroke="#d1d9e0"/>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+    <text x="64" y="38" fill="#59636e" font-size="13" letter-spacing="1.7">DESKTOP CONNECTOR / BROWSER SDK</text>
+    <text x="1216" y="38" text-anchor="end" fill="#59636e" font-size="13" letter-spacing="1.4">OPEN SOURCE · ALPHA</text>
+    <g transform="translate(54 66) scale(.76)"><g fill="none" stroke-width="7" stroke-linecap="square" stroke-linejoin="miter">
+    <path stroke="#1f2328" d="M34 24H18V104H34M94 24H110V104H94"/>
+    <path stroke="#176b43" d="M46 84L84 46M58 46H84V72"/>
+  </g></g>
+    <text x="164" y="141" fill="#1f2328" font-size="74" font-weight="600" letter-spacing="-4">Bring AI<tspan fill="#176b43">_</tspan></text>
+    <text x="64" y="218" fill="#1f2328" font-size="32" letter-spacing="-1">Local inference bridge for web apps.</text>
+    <text x="64" y="255" fill="#59636e" font-size="18">Connect an account. Approve an origin. Request inference.</text>
+    
+    <rect x="64" y="310" width="304" height="90" rx="2" fill="#ffffff" stroke="#d1d9e0"/>
+    <text x="86" y="346" fill="#1f2328" font-size="22">web app</text>
+    <text x="86" y="376" fill="#59636e" font-size="16">prompt + context</text>
+    
+    <rect x="488" y="310" width="304" height="90" rx="2" fill="#ffffff" stroke="#176b43"/>
+    <text x="510" y="346" fill="#176b43" font-size="22">127.0.0.1:4360</text>
+    <text x="510" y="376" fill="#59636e" font-size="16">permissioned connector</text>
+    
+    <rect x="912" y="310" width="304" height="90" rx="2" fill="#ffffff" stroke="#d1d9e0"/>
+    <text x="934" y="346" fill="#1f2328" font-size="22">AI provider</text>
+    <text x="934" y="376" fill="#59636e" font-size="16">your connected account</text>
+    <g fill="none" stroke="#59636e" stroke-width="1.5" marker-start="url(#arrow)" marker-end="url(#arrow)"><path d="M390 355H466"/><path d="M814 355H890"/></g>
+    <text x="64" y="448" fill="#59636e" font-size="16">Credentials stay on your computer. App tools stay on the server.</text>
+    <path d="M1202 438H1216V424M50 424V438H64" fill="none" stroke="#d1d9e0"/>
+  </g></svg>
