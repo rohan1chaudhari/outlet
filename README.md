@@ -16,6 +16,10 @@
 
 **Apps plug in. You bring the AI.**
 
+![A web app connects to Outlet, the user approves it, and a meal estimate runs on the user's ChatGPT plan](docs/evidence/outlet-demo.gif)
+
+*Crumb, the reference app, running locally. Waiting on the model is sped up.*
+
 Outlet lets a web app use the AI its users already have. The user runs a small desktop connector, approves your site, and your app sends inference requests through it. You ship the software; the model access stays with the user.
 
 - **No inference bill.** Requests run on the user's own AI connection, so your costs do not grow with usage.
