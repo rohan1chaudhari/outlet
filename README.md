@@ -1,7 +1,7 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/banner-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="docs/brand/banner-light.svg">
-  <img alt="Bring AI — local inference bridge for web apps. Open-source desktop connector and browser SDK." src="docs/brand/banner-light.svg" width="1280" height="480">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/outlet/banner-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="docs/brand/outlet/banner-light.png">
+  <img alt="Outlet. Apps plug in. You bring the AI." src="docs/brand/outlet/banner-light.png" width="1280">
 </picture>
 
 <p align="center">
@@ -12,7 +12,18 @@
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
-Bring AI connects web applications to a user's AI account through a local, permissioned service. It includes a desktop connection manager and a dependency-free browser SDK. App backends retain their tools, state and agent loops.
+# Outlet
+
+**Apps plug in. You bring the AI.**
+
+Outlet lets a web app use the AI its users already have. The user runs a small desktop connector, approves your site, and your app sends inference requests through it. You ship the software; the model access stays with the user.
+
+- **No inference bill.** Requests run on the user's own AI connection, so your costs do not grow with usage.
+- **No keys to hold.** Credentials stay on the user's laptop. Your app gets a scoped, expiring session that the user can pause or revoke.
+- **Your backend stays yours.** Tools, state and agent loops run on your server. Outlet does inference only: no shell, no MCP, no tool execution.
+- **About ten lines to add.** A dependency-free browser SDK with TypeScript types: `connectAI()`, then `ai.generate()`.
+
+> **Renaming in progress.** Outlet was called Bring AI. The desktop app, the `@bring-ai/browser` package and the commands below still use the old name until the code rename lands.
 
 **Alpha:** existing Codex is verified on macOS. Direct ChatGPT sign-in is experimental. [Tested behavior and limitations](docs/validation.md).
 
@@ -35,7 +46,7 @@ sequenceDiagram
   Note over Server: Validate, authorize and run app tools here
 ```
 
-![Bring AI desktop connection manager](docs/evidence/utility-main.png)
+![Outlet desktop window](docs/evidence/outlet-main.png)
 
 ## Try the desktop app
 

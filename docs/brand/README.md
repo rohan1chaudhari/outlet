@@ -1,5 +1,7 @@
 # Bring AI identity
 
+> Superseded on 2026-11-09 by the [Outlet identity](outlet/README.md). The assets below remain for history.
+
 Technical, quiet, open source. Lead with what the software does: **Local inference bridge for web apps.**
 
 The mark combines square brackets with the existing upward-right arrow. It represents a bounded connection, matching the project's origin approval and inference-only interface. The underscore in the wordmark is a terminal reference, not part of the project name.
