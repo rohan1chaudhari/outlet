@@ -3,6 +3,15 @@
   "version": "0.1.0",
   "type": "module",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rohan1chaudhari/outlet.git",
+    "directory": "packages/browser"
+  },
+  "homepage": "https://github.com/rohan1chaudhari/outlet#readme",
+  "bugs": {
+    "url": "https://github.com/rohan1chaudhari/outlet/issues"
+  },
   "description": "Connect independent web apps to a user-owned Bring AI connector",
   "exports": {
     ".": {

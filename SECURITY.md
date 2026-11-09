@@ -27,6 +27,6 @@ History keeps at most 100 metadata records in the same OS-encrypted local vault:
 
 ## Reporting and release gates
 
-Before a public repository exists, share a private reproducer directly with the maintainer through an already agreed channel; do not post live credentials or exploit details publicly. When publishing, enable GitHub private vulnerability reporting and add the actual reporting link here.
+Report vulnerabilities privately through [GitHub private vulnerability reporting](https://github.com/rohan1chaudhari/outlet/security/advisories/new). Do not open a public issue, and never include live credentials or session tokens in a report.
 
 Public release gates: live fresh-account OAuth acceptance; external security review; signed and notarized installers; Windows/Linux and browser matrix; provider-specific integration eligibility; update signature and rollback design. Never disable browser web security, certificate checks, keychain encryption or native consent to make a demo pass. Dev-only CDP debugging must stay off in packaged builds.

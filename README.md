@@ -130,7 +130,7 @@ Electron bundles the desktop runtime. Provider credentials are encrypted using t
 
 The first release target is desktop Chrome/Chromium on macOS. Windows/Linux packaging configuration and CI are included but are unverified locally. Firefox, Safari, mobile, background jobs and a signed auto-updater are not claimed. An extension transport can be added if browser compatibility evidence warrants it; it is not required by this implementation.
 
-Apache-2.0. See [CONTRIBUTING.md](CONTRIBUTING.md). Reusable logos, banners and the repository preview are in [docs/brand](docs/brand/README.md). Source and build are local; no public GitHub repository, package or download service has been published.
+Apache-2.0. See [CONTRIBUTING.md](CONTRIBUTING.md). Reusable logos, banners and the repository preview are in [docs/brand](docs/brand/README.md). Source is on GitHub at [rohan1chaudhari/outlet](https://github.com/rohan1chaudhari/outlet). No npm package, signed installer or download service has been published yet; build from source.
 
 ## Provider references
 
