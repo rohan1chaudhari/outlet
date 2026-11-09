@@ -39,13 +39,16 @@ sequenceDiagram
 
 ## Try the desktop app
 
-Local macOS Apple Silicon builds are in `dist/`. Open `dist/mac-arm64/Bring AI.app`. This is an **unsigned development build**, not a notarized public release. The connector installer requires no Node or npm. Inference uses a separately installed Codex or Claude client; developers building the source need Node 22+.
+Local macOS Apple Silicon builds are in `dist/`. Open `dist/mac-arm64/Bring AI.app`. This is an **unsigned development build**, not a notarized public release. Bring AI can install the Codex or Claude client for you, without Node, npm or terminal steps. Existing installations and sign-ins are reused. Developers building the source need Node 22+.
 
-1. Open Bring AI. Connect **Codex** or **Claude**. If a client is missing, **Set up** opens its official installation instructions; if it needs authentication, **Sign in** starts its browser sign-in flow.
+1. Open Bring AI. Choose **Install** for a missing Codex or Claude client. Bring AI downloads the provider’s official native installer, installs the client for your user account, then starts browser sign-in. If it is already installed, choose **Sign in** or **Connect**. Progress, Cancel and an **Open browser** fallback appear in the same row. Failed setup offers the fixed official instructions.
 2. In a participating app, choose **Connect my AI**. Allow the browser's local-network permission if requested.
 3. Compare the six-digit code and exact site origin in Bring AI. Select the connection, duration and request allowance, then allow the app.
 4. Use **Configure → Model** to pick a model from a dropdown. Codex choices come from its installed client catalog; Claude uses supported model aliases. New app connections use the selected model.
-5. Revoke an app, or use **Settings** for pause and open-at-login controls. Closing Bring AI ends every app session.
+5. Closing the window keeps Bring AI running in the menu bar (system tray on other platforms). Its menu offers **Open Bring AI**, **History**, **Pause AI access**, **Revoke all web apps**, **Open at login**, and **Quit Bring AI**. Quit ends every app session. Login startup is optional and opens in the background.
+6. **History** in the menu or window shows the last 100 requests: app origin, provider/model, time, duration and status. This metadata is encrypted locally, survives restarts and can be cleared. History starts with requests made after this feature was installed; prompt/response content remains outside the saved log.
+
+The installers are documented by [OpenAI](https://learn.chatgpt.com/docs/codex/cli) and [Anthropic](https://code.claude.com/docs/en/setup), checked 2026-11-09. Complete clean-machine installation and first sign-in still need acceptance testing; existing local clients are not replaced to simulate that test.
 
 **Verified route:** existing Codex on macOS, with real inference through the browser SDK. **Experimental route:** direct ChatGPT OAuth and Responses inference, implemented from the documented OSS/local flow and tested with synthetic OAuth/inference fixtures; a fresh live sign-in still needs user verification. This connector is not a promise of support for every subscription or third-party hosted app. The installed Claude adapter detects sign-in and enforces an inference-only configuration; this machine’s live request was rejected for insufficient credits, so successful Claude inference remains unverified. Local-model adapters are not implemented.
 

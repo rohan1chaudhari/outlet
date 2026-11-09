@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Button, Chip, Modal, Switch } from "@heroui/react";
+import { Button, Chip, Switch } from "@heroui/react";
 import { NativeSelect } from "@heroui-pro/react/native-select";
+import { Dialog } from "./Dialog";
+import { History } from "./History";
 
 const initial = {
   profiles: [],
@@ -31,33 +33,6 @@ const option = (value, label) => (
     {label}
   </NativeSelect.Option>
 );
-
-function Dialog({ title, open, onClose, children, footer }) {
-  return (
-    <Modal.Backdrop
-      isOpen={open}
-      onOpenChange={(value) => {
-        if (!value) onClose();
-      }}
-    >
-      <Modal.Container>
-        <Modal.Dialog className="utility-dialog">
-          <Modal.Header>
-            <Modal.Heading>{title}</Modal.Heading>
-          </Modal.Header>
-          <Modal.Body>{children}</Modal.Body>
-          <Modal.Footer>
-            {footer || (
-              <Button variant="secondary" onPress={onClose}>
-                Done
-              </Button>
-            )}
-          </Modal.Footer>
-        </Modal.Dialog>
-      </Modal.Container>
-    </Modal.Backdrop>
-  );
-}
 
 function Toggle({ children, value, onChange, disabled }) {
   return (
@@ -235,8 +210,10 @@ function ProviderSettings({ provider, profile, action, onClose, error }) {
 export function App() {
   const [state, setState] = useState(initial);
   const [error, setError] = useState("");
+  const [helpProvider, setHelpProvider] = useState(null);
   const [busy, setBusy] = useState("");
   const [settings, setSettings] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [configuring, setConfiguring] = useState(null);
   useEffect(() => {
     let mounted = true;
@@ -255,7 +232,7 @@ export function App() {
     setError("");
     try {
       const result = await window.bringAI.action(name, input);
-      if (!result.ok)
+      if (!result.ok && result.error?.code !== "setup_cancelled")
         setError(result.error?.message || "Could not complete this action.");
       return result.ok;
     } catch {
@@ -265,10 +242,8 @@ export function App() {
   }
   async function connect(provider) {
     setBusy(provider.id);
-    const status = state.clients[provider.id];
-    if (!status?.available)
-      await action("installClient", { provider: provider.id });
-    else await action("connectClient", { provider: provider.id });
+    const ok = await action("connectClient", { provider: provider.id });
+    setHelpProvider(ok ? null : provider.id);
     setBusy("");
   }
   const providers = [
@@ -280,9 +255,19 @@ export function App() {
     if (requested) {
       setConfiguring(null);
       setSettings(false);
+      setHistoryOpen(false);
       setError("");
     }
   }, [requested?.id]);
+  useEffect(() => {
+    if (requested) return;
+    setHistoryOpen(state.viewRequest?.name === "history");
+    if (state.viewRequest?.name === "history") {
+      setSettings(false);
+      setConfiguring(null);
+      setError("");
+    }
+  }, [state.viewRequest?.sequence]);
   const configuredProfile =
     configuring && state.profiles.find((p) => p.id === configuring.id);
   const unavailable = !!state.startupError;
@@ -290,9 +275,27 @@ export function App() {
     <main className="utility-window">
       <header className="utility-header">
         <h1>Bring AI</h1>
-        <Button variant="ghost" onPress={() => setSettings(true)}>
-          Settings
-        </Button>
+        <div className="utility-header-actions">
+          <Button
+            variant="ghost"
+            onPress={() => {
+              setHistoryOpen(true);
+              setSettings(false);
+              setError("");
+            }}
+          >
+            History
+          </Button>
+          <Button
+            variant="ghost"
+            onPress={() => {
+              setSettings(true);
+              setHistoryOpen(false);
+            }}
+          >
+            Settings
+          </Button>
+        </div>
       </header>
       <div className="service-line">
         <Chip
@@ -306,10 +309,20 @@ export function App() {
         </Chip>
         <span className="endpoint">127.0.0.1:{state.port}</span>
       </div>
-      {((error && !configuring && !requested && !settings) ||
+      {((error && !configuring && !requested && !settings && !historyOpen) ||
         state.startupError) && (
         <div className="notice" role="alert">
           {error || state.startupError}
+          {helpProvider && (
+            <Button
+              variant="ghost"
+              onPress={() =>
+                action("installationHelp", { provider: helpProvider })
+              }
+            >
+              Setup help
+            </Button>
+          )}
           <Button
             variant="ghost"
             onPress={() => setError("")}
@@ -324,6 +337,7 @@ export function App() {
           <h2 id="providers-heading">Providers</h2>
           <Button
             variant="ghost"
+            isDisabled={!!state.clientSetup}
             isPending={busy === "detect"}
             onPress={async () => {
               setBusy("detect");
@@ -337,14 +351,14 @@ export function App() {
         {providers.map((provider) => {
           const profile = state.profiles.find((p) => p.id === provider.id);
           const client = state.clients[provider.id];
-          const waiting = state.connectingClient === provider.id;
+          const waiting = state.clientSetup?.provider === provider.id;
           return (
             <div key={provider.id} className="provider-row">
               <div>
                 <h3>{provider.name}</h3>
                 <p className="muted">
                   {waiting
-                    ? "Finish signing in in your browser"
+                    ? state.clientSetup.message
                     : profile
                       ? profile.model.endsWith("-default")
                         ? "Connected · Default model"
@@ -359,15 +373,26 @@ export function App() {
                 </p>
               </div>
               {waiting ? (
-                <Button
-                  variant="secondary"
-                  onPress={() => action("cancelClientLogin")}
-                >
-                  Cancel
-                </Button>
+                <div className="setup-actions">
+                  {state.clientSetup.loginUrl && (
+                    <Button
+                      variant="ghost"
+                      onPress={() => action("openClientLogin")}
+                    >
+                      Open browser
+                    </Button>
+                  )}
+                  <Button
+                    variant="secondary"
+                    onPress={() => action("cancelClientSetup")}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               ) : profile ? (
                 <Button
                   variant="secondary"
+                  isDisabled={!!state.clientSetup}
                   onPress={() => {
                     setError("");
                     setConfiguring(provider);
@@ -378,7 +403,7 @@ export function App() {
               ) : (
                 <Button
                   variant={client?.available ? "primary" : "secondary"}
-                  isDisabled={unavailable || !client}
+                  isDisabled={unavailable || !client || !!state.clientSetup}
                   isPending={busy === provider.id}
                   onPress={() => connect(provider)}
                 >
@@ -388,13 +413,19 @@ export function App() {
                       ? client.ready
                         ? "Connect"
                         : "Sign in"
-                      : "Set up"}
+                      : "Install"}
                 </Button>
               )}
             </div>
           );
         })}
       </section>
+      {Object.values(state.clients).some((client) => !client.available) && (
+        <p className="setup-copy muted">
+          Install uses the provider’s official installer. Sign-in opens in your
+          browser.
+        </p>
+      )}
       <section
         aria-labelledby="apps-heading"
         className="utility-section apps-section"
@@ -462,6 +493,10 @@ export function App() {
           <span className="muted">Local address</span>
           <code>http://127.0.0.1:{state.port}</code>
         </div>
+        <p className="muted">
+          Closing this window keeps Bring AI in the menu bar. Use Quit Bring AI
+          there to stop it.
+        </p>
       </Dialog>
       {configuring && configuredProfile && (
         <ProviderSettings
@@ -472,6 +507,17 @@ export function App() {
           error={error}
           onClose={() => {
             setConfiguring(null);
+            setError("");
+          }}
+        />
+      )}
+      {historyOpen && (
+        <History
+          entries={state.history || []}
+          error={error || state.historyError}
+          onClear={() => action("clearHistory")}
+          onClose={() => {
+            setHistoryOpen(false);
             setError("");
           }}
         />

@@ -56,6 +56,39 @@ const request = (id = "request-123") =>
     requestId: id,
     messages: [{ role: "user", content: "hello" }],
   });
+
+test("request history outlives result recovery and records failure and cancellation outcomes", async (t) => {
+  const { c, pair, approve, advance } = setup(t);
+  const grant = c.authenticate(origin, approve(pair()).token);
+  await c.generate(grant, request("history-completed"), null, () => {});
+  advance(120001);
+  c.cleanup();
+  assert.throws(() => c.requestStatus(grant, "history-completed"), {
+    code: "request_unknown",
+  });
+  assert.equal(c.snapshot().history[0].status, "completed");
+  c.providers.generate = async () => {
+    throw new Error("fixture provider failure");
+  };
+  await c.generate(grant, request("history-failed"), null, () => {});
+  assert.equal(c.snapshot().history[0].status, "failed");
+  c.providers.generate = async (_, { signal }) =>
+    new Promise((resolve, reject) =>
+      signal.addEventListener("abort", () => reject(signal.reason), {
+        once: true,
+      }),
+    );
+  const pending = c.generate(
+    grant,
+    request("history-cancelled"),
+    null,
+    () => {},
+  );
+  c.pause(true);
+  await pending;
+  assert.equal(c.snapshot().history[0].status, "cancelled");
+  assert.equal(c.snapshot().history[0].provider, "fake");
+});
 test("a website cannot grant its own access; native approval and proof are both required", (t) => {
   const { c, pair, approve } = setup(t);
   const p = pair();

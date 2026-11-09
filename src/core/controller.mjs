@@ -2,13 +2,15 @@ import { EventEmitter } from "node:events";
 import { randomBytes, createHash, randomInt } from "node:crypto";
 import { fail, publicError } from "./errors.mjs";
 import { pairingInput, validateOutput } from "./validation.mjs";
+import { RequestHistory } from "./history.mjs";
 
 const hash = (value) => createHash("sha256").update(value).digest("base64url");
 export class ConnectorController extends EventEmitter {
-  constructor({ providers, now = Date.now }) {
+  constructor({ providers, now = Date.now, history = new RequestHistory() }) {
     super();
     this.providers = providers;
     this.now = now;
+    this.history = history;
     this.pairings = new Map();
     this.grants = new Map();
     this.tokens = new Map();
@@ -224,6 +226,12 @@ export class ConnectorController extends EventEmitter {
       controller,
     };
     this.requests.set(key, record);
+    record.historyId = this.history.start({
+      origin: grant.origin,
+      provider: grant.provider,
+      model: grant.model,
+      startedAt: record.updatedAt,
+    });
     this.active = record;
     grant.remaining--;
     const stop = () => controller.abort();
@@ -277,6 +285,7 @@ export class ConnectorController extends EventEmitter {
       signal?.removeEventListener("abort", stop);
       delete record.controller;
       record.updatedAt = this.now();
+      this.history.finish(record.historyId, record.status, record.updatedAt);
       if (this.active === record) this.active = null;
       this.changed();
     }
@@ -360,11 +369,15 @@ export class ConnectorController extends EventEmitter {
           status,
           updatedAt,
         })),
+      history: this.history.snapshot(),
+      historyError: this.history.error,
     };
   }
   close() {
     clearInterval(this.cleanupTimer);
     this.active?.controller?.abort();
+    if (this.active)
+      this.history.finish(this.active.historyId, "cancelled", this.now());
     this.tokens.clear();
     this.pairings.clear();
     this.grants.clear();

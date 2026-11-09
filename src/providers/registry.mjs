@@ -2,11 +2,8 @@ import { EventEmitter } from "node:events";
 import { findCodex, generateCodex } from "./codex.mjs";
 import { ChatGPTProvider } from "./chatgpt.mjs";
 import { findClaude, generateClaude } from "./claude.mjs";
-import { runClient } from "./cli-process.mjs";
+import { ClientSetup } from "./client-setup.mjs";
 import { listCodexModels } from "./codex-models.mjs";
-import { mkdtemp, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { fail } from "../core/errors.mjs";
 
 export class ProviderRegistry extends EventEmitter {
@@ -26,7 +23,10 @@ export class ProviderRegistry extends EventEmitter {
         { id: "fable", name: "Fable" },
       ],
     };
-    this.login = null;
+    this.setup = new ClientSetup({
+      openExternal: options?.openExternal,
+      onChange: () => this.emit("change"),
+    });
     this.chatgpt = new ChatGPTProvider(vault, {
       ...options,
       onChange: () => this.emit("change"),
@@ -75,52 +75,13 @@ export class ProviderRegistry extends EventEmitter {
     this.emit("change");
   }
   async connectClient(provider) {
-    if (!["codex", "claude"].includes(provider))
-      fail("invalid_provider", "Choose Codex or Claude.");
-    await this.detect();
-    const detected = provider === "codex" ? this.detected : this.detectedClaude;
-    if (!detected)
-      fail(
-        "client_unavailable",
-        "Install this client, then choose Check again.",
-      );
-    if (!detected.ready) {
-      if (this.login)
-        fail(
-          "login_pending",
-          "Finish or cancel the current sign-in first.",
-          409,
-        );
-      const controller = new AbortController();
-      this.login = { provider, controller };
-      this.emit("change");
-      const timeout = setTimeout(() => controller.abort(), 600000);
-      const dir = await mkdtemp(join(tmpdir(), "bring-ai-signin-"));
-      try {
-        const { code } = await runClient({
-          binary: detected.binary,
-          args:
-            provider === "codex" ? ["login"] : ["--safe-mode", "auth", "login"],
-          cwd: dir,
-          signal: controller.signal,
-        });
-        if (code !== 0)
-          fail("sign_in_failed", "Sign-in did not complete. Try again.");
-        await this.detect();
-        if (!this.clientStatus[provider].ready)
-          fail("sign_in_failed", "This client is not signed in yet.");
-      } finally {
-        clearTimeout(timeout);
-        this.login = null;
-        await rm(dir, { recursive: true, force: true });
-        this.emit("change");
-      }
-    }
-    if (provider === "codex") return this.connectCodex();
-    this.vault.data.claudeEnabled = true;
+    const client = await this.setup.connect(provider);
+    this.vault.data[`${provider}Enabled`] = true;
     await this.vault.save();
-    this.claude = this.detectedClaude;
+    this[provider] = client;
+    this.clientStatus[provider] = { available: true, ready: true };
     this.emit("change");
+    await this.detect();
   }
   async clientModel(provider, model) {
     if (
@@ -236,7 +197,7 @@ export class ProviderRegistry extends EventEmitter {
     return this.chatgpt.generate(a, request);
   }
   close() {
-    this.login?.controller.abort();
+    this.setup.cancel();
     this.chatgpt.cancelSignIn();
   }
 }

@@ -2,19 +2,14 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
-import { homedir, tmpdir } from "node:os";
+import { tmpdir } from "node:os";
+import { clientPaths } from "./client-paths.mjs";
 import { runClient } from "./cli-process.mjs";
 import { ConnectorError } from "../core/errors.mjs";
 const exec = promisify(execFile);
 
 export async function findClaude() {
-  const binaries = [
-    process.env.BRING_AI_CLAUDE_BINARY,
-    join(homedir(), ".local/bin/claude"),
-    "/opt/homebrew/bin/claude",
-    "/usr/local/bin/claude",
-    "claude",
-  ].filter(Boolean);
+  const binaries = clientPaths("claude");
   for (const binary of binaries) {
     try {
       const { stdout } = await exec(
@@ -24,7 +19,7 @@ export async function findClaude() {
       );
       return { binary, ready: JSON.parse(stdout).loggedIn === true };
     } catch (error) {
-      if (error.code !== "ENOENT" && !error.killed)
+      if (error.code !== "ENOENT")
         return { binary, ready: false };
     }
   }

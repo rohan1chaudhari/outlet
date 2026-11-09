@@ -1,7 +1,8 @@
 import { spawn, execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdtemp, writeFile, rm } from "node:fs/promises";
-import { tmpdir, homedir } from "node:os";
+import { tmpdir } from "node:os";
+import { clientPaths } from "./client-paths.mjs";
 import { join } from "node:path";
 import { ConnectorError } from "../core/errors.mjs";
 const exec = promisify(execFile);
@@ -28,13 +29,7 @@ const disabled = [
 ];
 
 export async function findCodex() {
-  const candidates = [
-    process.env.BRING_AI_CODEX_BINARY,
-    join(homedir(), ".local/bin/codex"),
-    "/opt/homebrew/bin/codex",
-    "/usr/local/bin/codex",
-    "codex",
-  ].filter(Boolean);
+  const candidates = clientPaths("codex");
   for (const binary of candidates) {
     try {
       const { stdout, stderr } = await exec(binary, ["login", "status"], {
@@ -44,7 +39,7 @@ export async function findCodex() {
       });
       return { binary, ready: /logged in/i.test(stdout + stderr) };
     } catch (e) {
-      if (e.code !== "ENOENT" && e.killed !== true)
+      if (e.code !== "ENOENT")
         return { binary, ready: false };
     }
   }

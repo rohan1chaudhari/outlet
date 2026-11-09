@@ -1,4 +1,5 @@
-import { spawn } from "node:child_process";
+import { spawn, execFile } from "node:child_process";
+import { win32 } from "node:path";
 import { ConnectorError } from "../core/errors.mjs";
 
 // Only fixed native adapter arguments reach this runner, never website commands.
@@ -7,6 +8,8 @@ export function runClient({
   args,
   cwd,
   input = "",
+  env = process.env,
+  onOutput,
   signal,
   limit = 4 * 1024 * 1024,
 }) {
@@ -14,6 +17,7 @@ export function runClient({
   return new Promise((resolve, reject) => {
     const child = spawn(binary, args, {
       cwd,
+      env,
       stdio: ["pipe", "pipe", "pipe"],
       detached: process.platform !== "win32",
       windowsHide: true,
@@ -26,7 +30,17 @@ export function runClient({
     const kill = (name) => {
       try {
         if (process.platform !== "win32") process.kill(-child.pid, name);
-        else child.kill(name);
+        else if (child.pid)
+          execFile(
+            win32.join(
+              process.env.SystemRoot || "C:\\Windows",
+              "System32",
+              "taskkill.exe",
+            ),
+            ["/PID", String(child.pid), "/T", "/F"],
+            { windowsHide: true },
+            () => {},
+          );
       } catch {}
     };
     const stop = (error) => {
@@ -40,6 +54,7 @@ export function runClient({
     const abort = () => stop();
     child.stdout.setEncoding("utf8");
     child.stdout.on("data", (chunk) => {
+      onOutput?.(chunk);
       size += Buffer.byteLength(chunk);
       if (size > limit)
         stop(
@@ -53,6 +68,7 @@ export function runClient({
     });
     child.stderr.setEncoding("utf8");
     child.stderr.on("data", (chunk) => {
+      onOutput?.(chunk);
       if (diagnostic.length < 4000) diagnostic += chunk;
     });
     child.stdin.on("error", () => {});

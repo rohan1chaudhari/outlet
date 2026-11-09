@@ -48,6 +48,7 @@
       "src/providers/**/*",
       "src/desktop/main.mjs",
       "src/desktop/preload.cjs",
+      "src/desktop/tray.mjs",
       "src/desktop/ui/**/*",
       "package.json",
       "LICENSE",

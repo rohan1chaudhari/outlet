@@ -13,6 +13,8 @@ import { ProviderRegistry } from "../providers/registry.mjs";
 import { ConnectorController } from "../core/controller.mjs";
 import { createConnectorServer } from "../core/server.mjs";
 import { publicError, fail } from "../core/errors.mjs";
+import { createTray } from "./tray.mjs";
+import { RequestHistory } from "../core/history.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 app.setName("Bring AI");
@@ -28,10 +30,18 @@ if (!app.isPackaged && process.env.BRING_AI_DEVTOOLS_PORT)
   );
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
-  let window, controller, providers, server, startupError;
+  let window, controller, providers, server, startupError, tray, history;
+  let quitting = false,
+    quitReady = false;
+  let viewRequest = { name: "main", sequence: 0 };
   const uiURL = new URL("./ui/index.html", import.meta.url).href;
-  const show = () => {
+  const show = (view) => {
     if (window) {
+      if (view === "main" || view === "history") {
+        viewRequest = { name: view, sequence: viewRequest.sequence + 1 };
+        notify();
+      }
+      app.dock?.show();
       window.show();
       window.focus();
     }
@@ -39,19 +49,25 @@ else {
   const snapshot = () => ({
     ...controller?.snapshot(),
     startupError,
+    viewRequest,
     detected: {
       available: !!providers?.detected,
       ready: !!providers?.detected?.ready,
     },
     signingIn: !!providers?.chatgpt.pending,
     clients: providers?.clientStatus || {},
-    connectingClient: providers?.login?.provider,
+    clientSetup: providers?.setup.state,
     port: 4360,
     launchAtLogin: app.getLoginItemSettings().openAtLogin,
   });
   const notify = () => {
     if (window && !window.isDestroyed())
       window.webContents.send("bring-ai:change", snapshot());
+    tray?.refresh();
+  };
+  const launchAtLogin = (value) => {
+    app.setLoginItemSettings({ openAtLogin: !!value, args: ["--background"] });
+    notify();
   };
   app.on("second-instance", show);
   // A protocol link only opens this app. It never approves or selects an account.
@@ -119,7 +135,8 @@ else {
         providers = new ProviderRegistry(vault, {
           openExternal: (url) => shell.openExternal(url),
         });
-        controller = new ConnectorController({ providers });
+        history = new RequestHistory(vault, { onChange: notify });
+        controller = new ConnectorController({ providers, history });
         controller.on("change", notify);
         providers.on("change", notify);
         server = createConnectorServer(controller);
@@ -157,12 +174,19 @@ else {
               await providers.connectClient(input.provider);
               break;
             case "cancelClientLogin":
-              providers.login?.controller.abort();
+            case "cancelClientSetup":
+              providers.setup.cancel();
+              break;
+            case "openClientLogin":
+              await providers.setup.openLogin();
               break;
             case "clientModel":
               await providers.clientModel(input.provider, input.model);
               break;
-            case "installClient": {
+            case "clearHistory":
+              await history.clear();
+              break;
+            case "installationHelp": {
               const url = {
                 codex: "https://developers.openai.com/codex/cli/",
                 claude: "https://code.claude.com/docs/en/setup",
@@ -218,7 +242,7 @@ else {
               controller.pause(input.value);
               break;
             case "launchAtLogin":
-              app.setLoginItemSettings({ openAtLogin: !!input.value });
+              launchAtLogin(input.value);
               break;
             case "usage":
               await shell.openExternal("https://chatgpt.com/settings/usage");
@@ -234,6 +258,7 @@ else {
       });
       function createWindow() {
         window = new BrowserWindow({
+          show: false,
           width: 560,
           height: 540,
           minWidth: 420,
@@ -252,18 +277,77 @@ else {
           if (url !== uiURL) event.preventDefault();
         });
         window.loadURL(uiURL);
+        window.once("ready-to-show", () => {
+          if (
+            !tray ||
+            startupError ||
+            !(
+              process.argv.includes("--background") ||
+              app.getLoginItemSettings().wasOpenedAtLogin
+            )
+          )
+            show();
+        });
+        window.on("close", (event) => {
+          if (!quitReady && tray) {
+            event.preventDefault();
+            window.hide();
+            app.dock?.hide();
+          }
+        });
         window.on("closed", () => {
           window = null;
         });
       }
       createWindow();
+      try {
+        tray = createTray({
+          getState: snapshot,
+          show: () => show("main"),
+          history: () => show("history"),
+          pause: (value) => controller?.pause(value),
+          revokeAll: () => {
+            for (const grant of controller?.snapshot().grants || [])
+              controller.revoke(grant.id);
+          },
+          launchAtLogin,
+          quit: () => app.quit(),
+        });
+      } catch {
+        // A desktop without a tray must retain a visible window and normal Quit.
+      }
+      if (
+        tray &&
+        !startupError &&
+        (process.argv.includes("--background") ||
+          app.getLoginItemSettings().wasOpenedAtLogin)
+      ) {
+        window.hide();
+        app.dock?.hide();
+      }
       app.on("activate", () => (window ? show() : createWindow()));
       app.on("window-all-closed", () => app.quit());
-      app.on("before-quit", () => {
-        providers?.close();
-        controller?.close();
-        server?.close();
-        server?.closeAllConnections();
+      app.on("before-quit", (event) => {
+        if (!quitReady) {
+          event.preventDefault();
+          if (quitting) return;
+          quitting = true;
+          providers?.close();
+          controller?.close();
+          server?.close();
+          server?.closeAllConnections();
+          Promise.allSettled([
+            providers?.setup.cancelAndWait(),
+            history?.flush(),
+          ]).finally(() => {
+            quitReady = true;
+            app.quit();
+          });
+          return;
+        }
+        quitting = true;
+        tray?.destroy();
+        tray = null;
       });
     })
     .catch(() => app.quit());
