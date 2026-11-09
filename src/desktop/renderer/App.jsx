@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Button, Chip, Switch } from "@heroui/react";
+import { Button, Card, Chip, Spinner, Switch, Tooltip } from "@heroui/react";
 import { NativeSelect } from "@heroui-pro/react/native-select";
 import { Dialog } from "./Dialog";
 import { History } from "./History";
+import { CloseIcon, HistoryIcon, RefreshIcon, SettingsIcon } from "./icons";
+import { clock, modelName, providerNames, siteName } from "./format";
 
 const initial = {
   profiles: [],
@@ -12,6 +14,11 @@ const initial = {
   paused: false,
   port: 4360,
 };
+
+const providers = [
+  { id: "codex", name: "Codex" },
+  { id: "claude", name: "Claude" },
+];
 
 function SelectField({ label, value, onChange, children }) {
   return (
@@ -34,21 +41,58 @@ const option = (value, label) => (
   </NativeSelect.Option>
 );
 
-function Toggle({ children, value, onChange, disabled }) {
+function IconButton({ label, onPress, children, ...props }) {
   return (
-    <Switch
-      className="setting-switch"
-      isSelected={value}
-      onChange={onChange}
-      isDisabled={disabled}
-    >
-      <Switch.Content className="setting-switch-content">
+    <Tooltip delay={300}>
+      <Button
+        isIconOnly
+        variant="ghost"
+        aria-label={label}
+        onPress={onPress}
+        {...props}
+      >
+        {children}
+      </Button>
+      <Tooltip.Content>{label}</Tooltip.Content>
+    </Tooltip>
+  );
+}
+
+function Toggle({ children, value, onChange }) {
+  return (
+    <Switch className="setting-row" isSelected={value} onChange={onChange}>
+      <Switch.Content className="setting-row-content">
         <span>{children}</span>
         <Switch.Control>
           <Switch.Thumb />
         </Switch.Control>
       </Switch.Content>
     </Switch>
+  );
+}
+
+function Notice({ children, onDismiss }) {
+  return (
+    <div className="notice" role="alert">
+      <span>{children}</span>
+      {onDismiss && (
+        <IconButton label="Dismiss" size="sm" onPress={onDismiss}>
+          <CloseIcon />
+        </IconButton>
+      )}
+    </div>
+  );
+}
+
+function Row({ title, detail, children }) {
+  return (
+    <div className="row">
+      <div className="row-text">
+        <h3 title={title}>{title}</h3>
+        {detail && <p className="muted">{detail}</p>}
+      </div>
+      <div className="row-actions">{children}</div>
+    </div>
   );
 }
 
@@ -81,15 +125,16 @@ function Approval({ request, profiles, action, error }) {
     );
     setBusy(false);
   };
+  const duration = minutes === "60" ? "1 hour" : `${minutes} min`;
   return (
     <Dialog
-      title="Connect Web App"
+      title="Allow access?"
       open
       onClose={() => decide(false)}
       footer={
         <>
           <Button
-            variant="secondary"
+            variant="tertiary"
             onPress={() => decide(false)}
             isDisabled={busy}
           >
@@ -105,44 +150,41 @@ function Approval({ request, profiles, action, error }) {
         </>
       }
     >
-      {error && (
-        <p className="notice" role="alert">
-          {error}
-        </p>
-      )}
-      <div className="approval-origin">{request.origin}</div>
-      <p className="muted">{request.purpose}</p>
-      <div className="pairing-proof">
-        <span className="muted">Match this code in your web app</span>
+      {error && <Notice>{error}</Notice>}
+      <div className="approval-site">
+        <h3 title={request.origin}>{siteName(request.origin)}</h3>
+        {request.purpose && <p className="muted">{request.purpose}</p>}
+      </div>
+      <div className="pairing-code">
+        <span className="muted">Code shown in the app</span>
         <strong>{request.verificationCode}</strong>
       </div>
       {compatible.length ? (
-        <SelectField label="Provider" value={selected} onChange={setChosen}>
+        <SelectField label="Use" value={selected} onChange={setChosen}>
           {compatible.map((p) => option(p.id, p.name))}
         </SelectField>
       ) : (
-        <p className="notice">
-          Connect a compatible provider before allowing this app.
-        </p>
+        <Notice>Connect an AI account that supports this app first.</Notice>
       )}
-      <div className="limits-summary">
-        <span className="muted">
-          {minutes} minutes · {requests} requests
-        </span>
-        <Button variant="ghost" onPress={() => setLimits(!limits)}>
-          {limits ? "Hide limits" : "Edit limits"}
-        </Button>
-      </div>
-      {limits && (
+      {limits ? (
         <div className="field-grid">
-          <SelectField label="Duration" value={minutes} onChange={setMinutes}>
+          <SelectField label="For" value={minutes} onChange={setMinutes}>
             {[15, 30, 60].map((v) =>
               option(String(v), v === 60 ? "1 hour" : `${v} minutes`),
             )}
           </SelectField>
-          <SelectField label="Requests" value={requests} onChange={setRequests}>
+          <SelectField label="Up to" value={requests} onChange={setRequests}>
             {[5, 20, 100].map((v) => option(String(v), `${v} requests`))}
           </SelectField>
+        </div>
+      ) : (
+        <div className="limits">
+          <span className="muted">
+            {duration} · {requests} requests
+          </span>
+          <Button variant="ghost" size="sm" onPress={() => setLimits(true)}>
+            Change
+          </Button>
         </div>
       )}
     </Dialog>
@@ -154,12 +196,21 @@ function ProviderSettings({ provider, profile, action, onClose, error }) {
   const [saving, setSaving] = useState(false);
   return (
     <Dialog
-      title={`Configure ${provider.name}`}
+      title={provider.name}
       open
       onClose={onClose}
       footer={
         <>
-          <Button variant="secondary" onPress={onClose}>
+          <Button
+            variant="danger-soft"
+            className="footer-start"
+            onPress={async () => {
+              if (await action("disconnect", { id: profile.id })) onClose();
+            }}
+          >
+            Disconnect
+          </Button>
+          <Button variant="tertiary" onPress={onClose}>
             Cancel
           </Button>
           <Button
@@ -179,11 +230,7 @@ function ProviderSettings({ provider, profile, action, onClose, error }) {
         </>
       }
     >
-      {error && (
-        <p className="notice" role="alert">
-          {error}
-        </p>
-      )}
+      {error && <Notice>{error}</Notice>}
       <SelectField label="Model" value={model} onChange={setModel}>
         {!profile.models.some((m) => m.id === model) && (
           <NativeSelect.Option value={model} disabled>
@@ -192,19 +239,17 @@ function ProviderSettings({ provider, profile, action, onClose, error }) {
         )}
         {profile.models.map((m) => option(m.id, m.name))}
       </SelectField>
-      <p className="muted">Applies to new web app connections.</p>
-      <div className="dialog-disconnect">
-        <Button
-          variant="danger-soft"
-          onPress={async () => {
-            if (await action("disconnect", { id: profile.id })) onClose();
-          }}
-        >
-          Disconnect
-        </Button>
-      </div>
+      <p className="muted">Used for new app connections.</p>
     </Dialog>
   );
+}
+
+function providerDetail(profile, client, setup) {
+  if (setup) return setup.message;
+  if (profile) return modelName(profile.model);
+  if (!client) return "Checking…";
+  if (!client.available) return "Not installed";
+  return client.ready ? "Ready" : "Signed out";
 }
 
 export function App() {
@@ -236,7 +281,7 @@ export function App() {
         setError(result.error?.message || "Could not complete this action.");
       return result.ok;
     } catch {
-      setError("The desktop connection is unavailable. Reopen Bring AI.");
+      setError("The desktop connection is unavailable. Reopen Outlet.");
       return false;
     }
   }
@@ -246,10 +291,6 @@ export function App() {
     setHelpProvider(ok ? null : provider.id);
     setBusy("");
   }
-  const providers = [
-    { id: "codex", name: "Codex" },
-    { id: "claude", name: "Claude" },
-  ];
   const requested = state.pairings[0];
   useEffect(() => {
     if (requested) {
@@ -271,51 +312,54 @@ export function App() {
   const configuredProfile =
     configuring && state.profiles.find((p) => p.id === configuring.id);
   const unavailable = !!state.startupError;
+  const status = unavailable
+    ? ["Unavailable", "danger"]
+    : state.paused
+      ? ["Paused", "warning"]
+      : ["On", "success"];
+  const showError =
+    (error && !configuring && !requested && !settings && !historyOpen) ||
+    state.startupError;
   return (
     <main className="utility-window">
       <header className="utility-header">
-        <h1>Bring AI</h1>
-        <div className="utility-header-actions">
-          <Button
-            variant="ghost"
+        <div className="brand">
+          <img src="./mark.png" alt="" width="24" height="24" />
+          <h1>Outlet</h1>
+          <Chip size="sm" variant="soft" color={status[1]}>
+            <Chip.Label>{status[0]}</Chip.Label>
+          </Chip>
+        </div>
+        <div className="header-actions">
+          <IconButton
+            label="History"
             onPress={() => {
               setHistoryOpen(true);
               setSettings(false);
               setError("");
             }}
           >
-            History
-          </Button>
-          <Button
-            variant="ghost"
+            <HistoryIcon />
+          </IconButton>
+          <IconButton
+            label="Settings"
             onPress={() => {
               setSettings(true);
               setHistoryOpen(false);
             }}
           >
-            Settings
-          </Button>
+            <SettingsIcon />
+          </IconButton>
         </div>
       </header>
-      <div className="service-line">
-        <Chip
-          size="sm"
-          color={unavailable ? "danger" : state.paused ? "default" : "success"}
-          variant="soft"
-        >
-          <Chip.Label>
-            {unavailable ? "Unavailable" : state.paused ? "Paused" : "Running"}
-          </Chip.Label>
-        </Chip>
-        <span className="endpoint">127.0.0.1:{state.port}</span>
-      </div>
-      {((error && !configuring && !requested && !settings && !historyOpen) ||
-        state.startupError) && (
-        <div className="notice" role="alert">
+
+      {showError && (
+        <Notice onDismiss={state.startupError ? null : () => setError("")}>
           {error || state.startupError}
           {helpProvider && (
             <Button
               variant="ghost"
+              size="sm"
               onPress={() =>
                 action("installationHelp", { provider: helpProvider })
               }
@@ -323,20 +367,15 @@ export function App() {
               Setup help
             </Button>
           )}
-          <Button
-            variant="ghost"
-            onPress={() => setError("")}
-            aria-label="Dismiss error"
-          >
-            Dismiss
-          </Button>
-        </div>
+        </Notice>
       )}
-      <section aria-labelledby="providers-heading" className="utility-section">
+
+      <section aria-labelledby="ai-heading" className="section">
         <div className="section-title">
-          <h2 id="providers-heading">Providers</h2>
-          <Button
-            variant="ghost"
+          <h2 id="ai-heading">AI Accounts</h2>
+          <IconButton
+            label="Check again"
+            size="sm"
             isDisabled={!!state.clientSetup}
             isPending={busy === "detect"}
             onPress={async () => {
@@ -345,138 +384,117 @@ export function App() {
               setBusy("");
             }}
           >
-            Check again
-          </Button>
+            <RefreshIcon />
+          </IconButton>
         </div>
-        {providers.map((provider) => {
-          const profile = state.profiles.find((p) => p.id === provider.id);
-          const client = state.clients[provider.id];
-          const waiting = state.clientSetup?.provider === provider.id;
-          return (
-            <div key={provider.id} className="provider-row">
-              <div>
-                <h3>{provider.name}</h3>
-                <p className="muted">
-                  {waiting
-                    ? state.clientSetup.message
-                    : profile
-                      ? profile.model.endsWith("-default")
-                        ? "Connected · Default model"
-                        : `Connected · ${profile.model}`
-                      : !client
-                        ? "Checking installation…"
-                        : client.available
-                          ? client.ready
-                            ? "Ready to connect"
-                            : "Sign in required"
-                          : "Not installed"}
-                </p>
-              </div>
-              {waiting ? (
-                <div className="setup-actions">
-                  {state.clientSetup.loginUrl && (
+        <Card className="list">
+          {providers.map((provider) => {
+            const profile = state.profiles.find((p) => p.id === provider.id);
+            const client = state.clients[provider.id];
+            const setup =
+              state.clientSetup?.provider === provider.id && state.clientSetup;
+            return (
+              <Row
+                key={provider.id}
+                title={provider.name}
+                detail={
+                  setup ? (
+                    <span className="working">
+                      <Spinner size="sm" />
+                      {setup.message}
+                    </span>
+                  ) : (
+                    providerDetail(profile, client)
+                  )
+                }
+              >
+                {setup ? (
+                  <>
+                    {setup.loginUrl && (
+                      <Button
+                        variant="ghost"
+                        onPress={() => action("openClientLogin")}
+                      >
+                        Open browser
+                      </Button>
+                    )}
                     <Button
-                      variant="ghost"
-                      onPress={() => action("openClientLogin")}
+                      variant="tertiary"
+                      onPress={() => action("cancelClientSetup")}
                     >
-                      Open browser
+                      Cancel
                     </Button>
-                  )}
+                  </>
+                ) : profile ? (
                   <Button
-                    variant="secondary"
-                    onPress={() => action("cancelClientSetup")}
+                    variant="tertiary"
+                    isDisabled={!!state.clientSetup}
+                    onPress={() => {
+                      setError("");
+                      setConfiguring(provider);
+                    }}
                   >
-                    Cancel
+                    Manage
                   </Button>
-                </div>
-              ) : profile ? (
-                <Button
-                  variant="secondary"
-                  isDisabled={!!state.clientSetup}
-                  onPress={() => {
-                    setError("");
-                    setConfiguring(provider);
-                  }}
-                >
-                  Configure
-                </Button>
-              ) : (
-                <Button
-                  variant={client?.available ? "primary" : "secondary"}
-                  isDisabled={unavailable || !client || !!state.clientSetup}
-                  isPending={busy === provider.id}
-                  onPress={() => connect(provider)}
-                >
-                  {!client
-                    ? "Checking"
-                    : client.available
-                      ? client.ready
-                        ? "Connect"
-                        : "Sign in"
-                      : "Install"}
-                </Button>
-              )}
-            </div>
-          );
-        })}
+                ) : (
+                  <Button
+                    variant={client?.available ? "primary" : "tertiary"}
+                    isDisabled={unavailable || !client || !!state.clientSetup}
+                    isPending={busy === provider.id}
+                    onPress={() => connect(provider)}
+                  >
+                    {client && !client.available
+                      ? "Install"
+                      : client && !client.ready
+                        ? "Sign in"
+                        : "Connect"}
+                  </Button>
+                )}
+              </Row>
+            );
+          })}
+        </Card>
       </section>
-      {Object.values(state.clients).some((client) => !client.available) && (
-        <p className="setup-copy muted">
-          Install uses the provider’s official installer. Sign-in opens in your
-          browser.
-        </p>
-      )}
-      <section
-        aria-labelledby="apps-heading"
-        className="utility-section apps-section"
-      >
+
+      <section aria-labelledby="apps-heading" className="section">
         <div className="section-title">
           <h2 id="apps-heading">Web Apps</h2>
         </div>
         {state.grants.length ? (
-          state.grants.map((grant) => (
-            <div className="app-row" key={grant.id}>
-              <div>
-                <h3 title={grant.origin}>{grant.origin}</h3>
-                <p className="muted">
-                  {grant.provider === "claude"
-                    ? "Claude"
-                    : grant.provider === "codex"
-                      ? "Codex"
-                      : "ChatGPT"}{" "}
-                  · {grant.remaining} requests left · until{" "}
-                  {new Date(grant.expiresAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-              <Button
-                variant="danger-soft"
-                onPress={() => action("revoke", { id: grant.id })}
+          <Card className="list">
+            {state.grants.map((grant) => (
+              <Row
+                key={grant.id}
+                title={siteName(grant.origin)}
+                detail={
+                  <span className="tabular">
+                    {providerNames[grant.provider] || grant.provider} ·{" "}
+                    {grant.remaining} left · until {clock(grant.expiresAt)}
+                  </span>
+                }
               >
-                Revoke
-              </Button>
-            </div>
-          ))
+                <Button
+                  variant="danger-soft"
+                  onPress={() => action("revoke", { id: grant.id })}
+                >
+                  Revoke
+                </Button>
+              </Row>
+            ))}
+          </Card>
         ) : (
-          <p className="empty-copy">
-            Choose “Connect AI” in your web app.
-            <br />
-            Its access request will appear here.
+          <p className="muted">
+            Apps appear here after you approve them.
           </p>
         )}
       </section>
+
       <Dialog
         title="Settings"
         open={settings}
         onClose={() => setSettings(false)}
       >
-        {error && (
-          <p className="notice" role="alert">
-            {error}
-          </p>
-        )}
+        {error && <Notice>{error}</Notice>}
         <Toggle
           value={!!state.launchAtLogin}
           onChange={(value) => action("launchAtLogin", { value })}
@@ -489,14 +507,10 @@ export function App() {
         >
           Pause all access
         </Toggle>
-        <div className="settings-endpoint">
-          <span className="muted">Local address</span>
-          <code>http://127.0.0.1:{state.port}</code>
+        <div className="setting-row-content">
+          <span>Local address</span>
+          <code className="muted">127.0.0.1:{state.port}</code>
         </div>
-        <p className="muted">
-          Closing this window keeps Bring AI in the menu bar. Use Quit Bring AI
-          there to stop it.
-        </p>
       </Dialog>
       {configuring && configuredProfile && (
         <ProviderSettings

@@ -16,7 +16,7 @@ export function Dialog({ title, open, onClose, children, footer }) {
           <Modal.Body>{children}</Modal.Body>
           <Modal.Footer>
             {footer || (
-              <Button variant="secondary" onPress={onClose}>
+              <Button variant="tertiary" onPress={onClose}>
                 Done
               </Button>
             )}

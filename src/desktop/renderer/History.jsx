@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Chip } from "@heroui/react";
 import { Dialog } from "./Dialog";
+import { clock, modelName, providerNames, siteName } from "./format";
 
 const statuses = {
   running: ["Working", "default"],
@@ -9,7 +10,19 @@ const statuses = {
   cancelled: ["Cancelled", "default"],
   interrupted: ["Interrupted", "default"],
 };
-const providers = { codex: "Codex", claude: "Claude", chatgpt: "ChatGPT" };
+
+function when(time) {
+  const date = new Date(time);
+  const today = new Date().toDateString() === date.toDateString();
+  return today
+    ? clock(time)
+    : date.toLocaleString([], {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+}
 
 export function History({ entries, error, onClear, onClose }) {
   const [clearing, setClearing] = useState(false);
@@ -22,6 +35,7 @@ export function History({ entries, error, onClear, onClose }) {
         <>
           <Button
             variant="ghost"
+            className="footer-start"
             isDisabled={!entries.length}
             isPending={clearing}
             onPress={async () => {
@@ -30,9 +44,9 @@ export function History({ entries, error, onClear, onClose }) {
               setClearing(false);
             }}
           >
-            Clear history
+            Clear
           </Button>
-          <Button variant="secondary" onPress={onClose}>
+          <Button variant="tertiary" onPress={onClose}>
             Done
           </Button>
         </>
@@ -43,7 +57,6 @@ export function History({ entries, error, onClear, onClose }) {
           {error}
         </p>
       )}
-      <p className="muted">Last 100 requests · Stored on this device</p>
       {entries.length ? (
         <ol className="history-list">
           {entries.map((entry) => {
@@ -51,42 +64,32 @@ export function History({ entries, error, onClear, onClose }) {
               entry.status,
               "default",
             ];
-            const model = entry.model.endsWith("-default")
-              ? "Default model"
-              : entry.model;
             const seconds = Math.max(
               0,
               Math.round((entry.updatedAt - entry.startedAt) / 1000),
             );
             return (
               <li className="history-row" key={entry.id}>
-                <div className="history-row-heading">
-                  <h3 title={entry.origin}>{entry.origin}</h3>
-                  <Chip size="sm" variant="soft" color={color}>
-                    <Chip.Label>{label}</Chip.Label>
-                  </Chip>
+                <div className="row-text">
+                  <h3 title={entry.origin}>{siteName(entry.origin)}</h3>
+                  <p className="muted tabular">
+                    {providerNames[entry.provider] || entry.provider} ·{" "}
+                    {modelName(entry.model)}
+                    {entry.status !== "running" && ` · ${seconds}s`} ·{" "}
+                    <time dateTime={new Date(entry.startedAt).toISOString()}>
+                      {when(entry.startedAt)}
+                    </time>
+                  </p>
                 </div>
-                <p className="muted">
-                  {providers[entry.provider] || entry.provider} · {model}
-                  {entry.status !== "running" && ` · ${seconds}s`}
-                </p>
-                <time
-                  className="muted"
-                  dateTime={new Date(entry.startedAt).toISOString()}
-                >
-                  {new Date(entry.startedAt).toLocaleString([], {
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </time>
+                <Chip size="sm" variant="soft" color={color}>
+                  <Chip.Label>{label}</Chip.Label>
+                </Chip>
               </li>
             );
           })}
         </ol>
       ) : (
-        <p className="muted">No AI requests yet.</p>
+        <p className="muted">No requests yet.</p>
       )}
     </Dialog>
   );

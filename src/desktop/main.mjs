@@ -89,7 +89,7 @@ else {
       Menu.setApplicationMenu(
         Menu.buildFromTemplate([
           {
-            label: "Bring AI",
+            label: "Outlet",
             submenu: [
               { role: "about" },
               { type: "separator" },
@@ -122,7 +122,7 @@ else {
         )
           fail(
             "keychain_unavailable",
-            "Bring AI needs an unlocked system keychain to protect sign-in credentials.",
+            "Outlet needs an unlocked system keychain to protect sign-in credentials.",
             503,
           );
         const vault = await new Vault(
@@ -152,7 +152,7 @@ else {
       } catch (e) {
         startupError =
           e.code === "EADDRINUSE"
-            ? "Port 4360 is in use. Close the other connector and reopen Bring AI."
+            ? "Port 4360 is in use. Close the other connector and reopen Outlet."
             : publicError(e).message;
       }
       ipcMain.handle("bring-ai:action", async (event, action, input = {}) => {
@@ -264,7 +264,7 @@ else {
           minWidth: 420,
           minHeight: 460,
           backgroundColor: "#fafafa",
-          title: "Bring AI",
+          title: "Outlet",
           webPreferences: {
             preload: join(here, "preload.cjs"),
             contextIsolation: true,

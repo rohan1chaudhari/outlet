@@ -3,29 +3,26 @@ import { Tray, Menu, nativeImage } from "electron";
 function trayIcon() {
   const size = 32;
   const pixels = Buffer.alloc(size * size * 4);
-  const line = (x1, y1, x2, y2) => {
-    const steps = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
-    for (let step = 0; step <= steps; step++) {
-      const x = Math.round(x1 + ((x2 - x1) * step) / steps);
-      const y = Math.round(y1 + ((y2 - y1) * step) / steps);
-      for (let dx = 0; dx < 2; dx++)
-        for (let dy = 0; dy < 2; dy++)
-          pixels[((y + dy) * size + x + dx) * 4 + 3] = 255;
-    }
+  // The Outlet mark at 2× menu-bar resolution: a rounded plate with two
+  // slots and a spark cut out, so it works as a monochrome template image.
+  const plate = (x, y) => {
+    const [lo, hi, r] = [3, 28, 6];
+    if (x < lo || x > hi || y < lo || y > hi) return false;
+    const cx = x < lo + r ? lo + r : x > hi - r ? hi - r : x;
+    const cy = y < lo + r ? lo + r : y > hi - r ? hi - r : y;
+    return (x - cx) ** 2 + (y - cy) ** 2 <= r * r;
   };
-  // The README's bracket-and-arrow mark at 2× menu-bar resolution.
-  for (const segment of [
-    [7, 5, 3, 5],
-    [3, 5, 3, 25],
-    [3, 25, 7, 25],
-    [25, 5, 29, 5],
-    [29, 5, 29, 25],
-    [29, 25, 25, 25],
-    [9, 15, 22, 15],
-    [17, 10, 22, 15],
-    [22, 15, 17, 20],
-  ])
-    line(...segment);
+  const slot = (x, y) =>
+    y >= 8 && y <= 16 && ((x >= 10 && x <= 12) || (x >= 19 && x <= 21));
+  const spark = (x, y) => {
+    const dx = Math.abs(x - 15.5);
+    const dy = Math.abs(y - 21.5);
+    return dx + dy <= 2.5 || (dx <= 0.5 && dy <= 4) || (dy <= 0.5 && dx <= 4);
+  };
+  for (let y = 0; y < size; y++)
+    for (let x = 0; x < size; x++)
+      if (plate(x, y) && !slot(x, y) && !spark(x, y))
+        pixels[(y * size + x) * 4 + 3] = 255;
   const image = nativeImage.createFromBitmap(pixels, {
     width: size,
     height: size,
@@ -52,10 +49,10 @@ export function createTray({
       : state.paused
         ? "Paused"
         : "Running";
-    tray.setToolTip(`Bring AI · ${status}`);
+    tray.setToolTip(`Outlet · ${status}`);
     const actions = () => [
-      { label: `Bring AI · ${status}`, enabled: false },
-      { label: "Open Bring AI", click: show },
+      { label: `Outlet · ${status}`, enabled: false },
+      { label: "Open Outlet", click: show },
       { label: "History…", click: history },
       { type: "separator" },
       {
@@ -78,7 +75,7 @@ export function createTray({
       },
       { type: "separator" },
       {
-        label: "Quit Bring AI",
+        label: "Quit Outlet",
         accelerator: "CommandOrControl+Q",
         click: quit,
       },
@@ -88,7 +85,7 @@ export function createTray({
     Menu.setApplicationMenu(
       Menu.buildFromTemplate([
         {
-          label: "Bring AI",
+          label: "Outlet",
           submenu: [{ role: "about" }, { type: "separator" }, ...actions()],
         },
         {
