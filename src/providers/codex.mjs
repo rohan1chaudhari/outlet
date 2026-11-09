@@ -104,7 +104,7 @@ export function parseCodexOutput(stdout, code, outputSchema) {
 
 export async function generateCodex(
   binary,
-  { messages, attachments, outputSchema, signal, onText },
+  { messages, attachments, outputSchema, model, signal, onText },
 ) {
   signal.throwIfAborted();
   const dir = await mkdtemp(join(tmpdir(), "bring-ai-inference-"));
@@ -123,6 +123,7 @@ export async function generateCodex(
       "never",
     ];
     for (const flag of disabled) args.push("--disable", flag);
+    if (model && model !== "codex-default") args.push("--model", model);
     for (const setting of [
       'web_search="disabled"',
       "skills.include_instructions=false",

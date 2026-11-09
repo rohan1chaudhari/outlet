@@ -7,21 +7,31 @@
   "type": "module",
   "main": "src/desktop/main.mjs",
   "scripts": {
-    "start": "electron .",
+    "start": "npm run build:ui && electron .",
     "test": "node --test test/*.test.mjs",
     "demo": "node scripts/demo-server.mjs",
-    "build": "electron-builder --mac dmg zip",
-    "build:dir": "electron-builder --dir",
-    "build:windows": "electron-builder --win nsis",
-    "build:linux": "electron-builder --linux AppImage"
+    "build": "npm run build:ui && electron-builder --mac dmg zip",
+    "build:dir": "npm run build:ui && electron-builder --dir",
+    "build:windows": "npm run build:ui && electron-builder --win nsis",
+    "build:linux": "npm run build:ui && electron-builder --linux AppImage",
+    "build:ui": "vite build --config vite.config.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",
     "jose": "6.2.15"
   },
   "devDependencies": {
+    "@heroui-pro/react": "1.0.0-beta.11",
+    "@heroui/react": "3.2.7",
+    "@heroui/styles": "3.2.7",
+    "@tailwindcss/vite": "4.3.5",
+    "@vitejs/plugin-react": "6.3.0",
     "electron": "45.2.3",
-    "electron-builder": "26.18.0"
+    "electron-builder": "26.18.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "tailwindcss": "4.3.5",
+    "vite": "8.3.7"
   },
   "engines": {
     "node": ">=22"
@@ -34,7 +44,11 @@
       "output": "dist"
     },
     "files": [
-      "src/**/*",
+      "src/core/**/*",
+      "src/providers/**/*",
+      "src/desktop/main.mjs",
+      "src/desktop/preload.cjs",
+      "src/desktop/ui/**/*",
       "package.json",
       "LICENSE",
       "NOTICE"

@@ -4,7 +4,7 @@ Status: development alpha; no independent security audit. This code is useful fo
 
 ## Boundaries
 
-- The desktop main process owns provider credentials, account selection and consent. Its sandboxed renderer has a narrow IPC API, no Node integration, a restrictive CSP, blocked navigation and no remote scripts. IPC accepts only that exact window and its main frame.
+- The desktop main process owns provider credentials, account selection and consent. The React/HeroUI renderer is bundled locally; its CSP permits inline positioning styles needed by accessible dialogs, but no remote scripts, network connections or Node APIs. Its sandboxed renderer has a narrow IPC API, no Node integration, a restrictive CSP, blocked navigation and no remote scripts. IPC accepts only that exact window and its main frame.
 - HTTP listens only on IPv4 loopback port 4360. Requests require an exact loopback Host and a canonical HTTPS Origin (HTTP loopback is allowed for development). `null` origins are rejected. CORS never enables cookies. Discovery returns generic service information, not account details.
 - Any secure site can request pairing. The native window shows its actual browser Origin prominently; the app name and purpose are untrusted display metadata. A six-digit code helps match requests. No HTTP endpoint approves an app. A custom protocol link only opens the connector.
 - The SDK proves possession of a random verifier before receiving a random session token. The token is origin-bound and stored only in the SDK object's memory. Provider tokens never enter the page. App sessions pin an account, provider, model, capabilities, expiration and request allowance. Reconnecting the same origin shares the remaining allowance.
@@ -19,7 +19,7 @@ An approved site, its scripts, or an XSS in it can consume that site's remaining
 
 The encrypted credential file uses the OS keychain via Electron safeStorage. Disk permissions are owner-only on Unix. The native app requires an available secure storage backend and refuses Linux `basic_text`. Refresh is serialized, rotating tokens are saved together, and sign-out attempts remote revocation before clearing local tokens. Account/client and host mappings remain for returning sign-in. No telemetry, remote crash collector, automatic login startup or background daemon is enabled by default.
 
-The connector retains inference results in RAM for request recovery, and short metadata history for display. The provider applies its own retention policy; `store:false` is not a general zero-retention promise. Codex manages its own authentication. The connector does not read or copy the Codex auth file.
+The connector retains inference results in RAM for request recovery, and short metadata history for display. The provider applies its own retention policy; `store:false` is not a general zero-retention promise. Codex and Claude manage their own authentication. Bring AI invokes their fixed sign-in/status commands; it does not read or copy either client’s auth file. Claude runs with safe mode, restricted mode, no tools, empty MCP configuration, disabled hooks, no session persistence, and an empty temporary working directory. Browser setup links point only to fixed official installation pages.
 
 ## Reporting and release gates
 

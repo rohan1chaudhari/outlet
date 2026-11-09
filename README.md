@@ -35,27 +35,35 @@ sequenceDiagram
   Note over Server: Validate, authorize and run app tools here
 ```
 
-![Bring AI desktop connection manager](docs/evidence/desktop-ready.png)
+![Bring AI desktop connection manager](docs/evidence/utility-main.png)
 
 ## Try the desktop app
 
-Local macOS Apple Silicon builds are in `dist/`. Open `dist/mac-arm64/Bring AI.app`. This is an **unsigned development build**, not a notarized public release. Normal installers do not require Node, npm, a terminal or Codex; developers building the source need Node 22+.
+Local macOS Apple Silicon builds are in `dist/`. Open `dist/mac-arm64/Bring AI.app`. This is an **unsigned development build**, not a notarized public release. The connector installer requires no Node or npm. Inference uses a separately installed Codex or Claude client; developers building the source need Node 22+.
 
-1. Open Bring AI and choose **Continue with ChatGPT**, or **Use existing Codex** if an authenticated Codex installation is detected.
+1. Open Bring AI. Connect **Codex** or **Claude**. If a client is missing, **Set up** opens its official installation instructions; if it needs authentication, **Sign in** starts its browser sign-in flow.
 2. In a participating app, choose **Connect my AI**. Allow the browser's local-network permission if requested.
 3. Compare the six-digit code and exact site origin in Bring AI. Select the connection, duration and request allowance, then allow the app.
-4. Revoke an app or pause all access in Bring AI at any time. Closing the desktop app ends every app session.
+4. Use **Configure → Model** to pick a model from a dropdown. Codex choices come from its installed client catalog; Claude uses supported model aliases. New app connections use the selected model.
+5. Revoke an app, or use **Settings** for pause and open-at-login controls. Closing Bring AI ends every app session.
 
-**Verified route:** existing Codex on macOS, with real inference through the browser SDK. **Experimental route:** direct ChatGPT OAuth and Responses inference, implemented from the documented OSS/local flow and tested with synthetic OAuth/inference fixtures; a fresh live sign-in still needs user verification. This connector is not a promise of support for every subscription or third-party hosted app. Claude and local-model adapters are not implemented in this version.
+**Verified route:** existing Codex on macOS, with real inference through the browser SDK. **Experimental route:** direct ChatGPT OAuth and Responses inference, implemented from the documented OSS/local flow and tested with synthetic OAuth/inference fixtures; a fresh live sign-in still needs user verification. This connector is not a promise of support for every subscription or third-party hosted app. The installed Claude adapter detects sign-in and enforces an inference-only configuration; this machine’s live request was rejected for insufficient credits, so successful Claude inference remains unverified. Local-model adapters are not implemented.
 
 The model runs at the provider when using Codex or ChatGPT; the credentials and connection manager live on your laptop. This does not mean the model runs offline on the laptop.
 
 ## Run from source
 
+The desktop renderer uses React 19, HeroUI v3 and HeroUI Pro. A developer building the desktop app needs a HeroUI Pro license and CLI sign-in; end users run the bundled app without those development tools. Pro source remains in ignored `node_modules`, separate from this project’s Apache-2.0 code.
+
 ```sh
-npm ci
+npm ci --ignore-scripts
+npx heroui-pro login
+npx heroui-pro install react --yes --skip-peers
+npm rebuild electron
 npm start
 ```
+
+`npm start` builds the static UI before launching Electron. The renderer runs from local files with no network access or Node integration. Backend-only checks can run with `npm ci --ignore-scripts && npm test`, without a HeroUI login. CI packages the desktop app only when the `HEROUI_AUTH_TOKEN` repository secret is configured.
 
 Run examples in separate terminals, then open the printed URLs:
 
@@ -71,12 +79,12 @@ Bring AI uses `127.0.0.1:4360`. It never binds a LAN address. Example servers ex
 The SDK lives at `packages/browser/`; it has no runtime dependencies and includes TypeScript declarations. It is not published to npm yet. Install from this checkout or copy the module into your build.
 
 ```js
-import { connectAI } from '@bring-ai/browser';
+import { connectAI } from "@bring-ai/browser";
 
 const ai = await connectAI({
-  name: 'My app',
-  purpose: 'Summarize the note you choose to submit.',
-  requires: ['text'],
+  name: "My app",
+  purpose: "Summarize the note you choose to submit.",
+  requires: ["text"],
   onPairing({ verificationCode, approvalUrl }) {
     // Show the code and an "Open Bring AI" link in your app.
     // The user approves in the trusted desktop window.
@@ -84,7 +92,7 @@ const ai = await connectAI({
 });
 
 const result = await ai.generate({
-  messages: [{ role: 'user', content: 'Summarize this note…' }],
+  messages: [{ role: "user", content: "Summarize this note…" }],
 });
 console.log(result.output);
 ```

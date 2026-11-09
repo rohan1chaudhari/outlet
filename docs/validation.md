@@ -28,3 +28,18 @@ The direct ChatGPT adapter is implemented using the current documented OSS/local
 ## Portfolio decision
 
 The extension-free transport works for the tested desktop environment and merits a bounded external-user setup test. Keep the broader idea as a developed seed and preserve existing active priorities. Next action: have one ChatGPT user with no CLI try the packaged setup; record completion, friction and a real direct request before promoting the no-CLI route to verified support. Public release also needs signed packaging and an actual private security-reporting channel.
+
+
+## Utility interface · 2026-11-09
+
+The Electron window is now a 560 × 540 utility using React 19, HeroUI v3 and the actual HeroUI Pro NativeSelect component. The old sidebar, slogans, marketing header, activity dashboard and decorative surfaces were removed. Normal controls are provider connection/configuration, web app approval/revocation, and a small Settings dialog.
+
+Model configuration is a dropdown: Codex uses the installed app-server’s `model/list` result; Claude uses the documented Default/Sonnet/Opus/Haiku/Fable aliases. The native API rejects values outside its model list. The chosen Codex model was saved and used for a real structured-output request from the Daylight web app. The result displayed 370 kcal and 21 g protein, and the allowance decreased from 5 to 4. Model availability and billing remain account-specific.
+
+Claude’s installed login was detected, connected and saved. Its inference-only process advertised an empty tool list, but the actual request returned “Credit balance is too low.” The connector fails that request with `claude_usage_unavailable`; no successful Claude inference is claimed. Parser fixtures verify success, structured formatting, rejection of executable tools, interrupted turns and the observed credit failure.
+
+All 24 automated tests passed. Renderer compilation and unsigned macOS app/DMG/ZIP packaging passed. UI controls were inspected in the real Electron window. [Main window](evidence/utility-main.png), [model dropdown](evidence/utility-model-dropdown.png). HeroUI base APIs were retrieved through its public MCP; the Pro docs MCP required a separate personal token, so the Pro NativeSelect API was checked against the official public docs and installed package types. The licensed vendor source stays outside git.
+
+The packaged `.app` was launched separately after stopping the development app. It rendered the bundled utility, detected both installed clients, and displayed the real Codex model catalog in its native dropdown. The expanded approval limits and Settings switches were inspected in the development window. All task-owned browser sessions, temporary profiles, example servers and native test windows were closed after verification.
+
+Missing-provider setup opens the fixed official installation page. Fresh native client installation and sign-in, successful Claude generation on a funded account, and cross-platform acceptance still require testing. The existing direct ChatGPT backend remains experimental and is no longer the main setup UI.

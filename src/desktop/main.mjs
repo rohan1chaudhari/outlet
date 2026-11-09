@@ -29,7 +29,7 @@ if (!app.isPackaged && process.env.BRING_AI_DEVTOOLS_PORT)
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
   let window, controller, providers, server, startupError;
-  const uiURL = new URL("./index.html", import.meta.url).href;
+  const uiURL = new URL("./ui/index.html", import.meta.url).href;
   const show = () => {
     if (window) {
       window.show();
@@ -44,6 +44,8 @@ else {
       ready: !!providers?.detected?.ready,
     },
     signingIn: !!providers?.chatgpt.pending,
+    clients: providers?.clientStatus || {},
+    connectingClient: providers?.login?.provider,
     port: 4360,
     launchAtLogin: app.getLoginItemSettings().openAtLogin,
   });
@@ -151,6 +153,24 @@ else {
               startupError || "The connector is unavailable.",
             );
           switch (action) {
+            case "connectClient":
+              await providers.connectClient(input.provider);
+              break;
+            case "cancelClientLogin":
+              providers.login?.controller.abort();
+              break;
+            case "clientModel":
+              await providers.clientModel(input.provider, input.model);
+              break;
+            case "installClient": {
+              const url = {
+                codex: "https://developers.openai.com/codex/cli/",
+                claude: "https://code.claude.com/docs/en/setup",
+              }[input.provider];
+              if (!url) fail("invalid_provider", "Choose Codex or Claude.");
+              await shell.openExternal(url);
+              break;
+            }
             case "detect":
               await providers.detect();
               break;
@@ -214,11 +234,11 @@ else {
       });
       function createWindow() {
         window = new BrowserWindow({
-          width: 1060,
-          height: 800,
-          minWidth: 780,
-          minHeight: 600,
-          backgroundColor: "#f8f9f7",
+          width: 560,
+          height: 540,
+          minWidth: 420,
+          minHeight: 460,
+          backgroundColor: "#fafafa",
           title: "Bring AI",
           webPreferences: {
             preload: join(here, "preload.cjs"),

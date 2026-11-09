@@ -8,3 +8,4 @@ dist/
 coverage/
 .playwright-cli/
 output/
+src/desktop/ui/
