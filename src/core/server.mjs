@@ -4,6 +4,7 @@ import {
   DEFAULT_PORT,
   PROTOCOL_VERSION,
   originOf,
+  GENERATION_TIMEOUT_MS,
   exchangeInput,
   generationInput,
 } from "./validation.mjs";
@@ -134,7 +135,7 @@ export function createConnectorServer(
       else if (!res.writableEnded) res.end();
     }
   });
-  server.requestTimeout = 135000;
+  server.requestTimeout = GENERATION_TIMEOUT_MS + 15000;
   server.headersTimeout = 10000;
   return server;
 }

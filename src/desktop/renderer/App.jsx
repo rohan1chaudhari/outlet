@@ -4,7 +4,15 @@ import { NativeSelect } from "@heroui-pro/react/native-select";
 import { Dialog } from "./Dialog";
 import { History } from "./History";
 import { CloseIcon, HistoryIcon, RefreshIcon, SettingsIcon } from "./icons";
-import { clock, modelName, providerNames, siteName } from "./format";
+import {
+  appName,
+  durationLabel,
+  modelName,
+  providerNames,
+  sessionMinutes,
+  sessionRequests,
+  until,
+} from "./format";
 
 const initial = {
   profiles: [],
@@ -125,7 +133,7 @@ function Approval({ request, profiles, action, error }) {
     );
     setBusy(false);
   };
-  const duration = minutes === "60" ? "1 hour" : `${minutes} min`;
+  const duration = durationLabel(minutes);
   return (
     <Dialog
       title="Allow access?"
@@ -152,7 +160,7 @@ function Approval({ request, profiles, action, error }) {
     >
       {error && <Notice>{error}</Notice>}
       <div className="approval-site">
-        <h3 title={request.origin}>{siteName(request.origin)}</h3>
+        <h3 title={request.origin}>{appName(request.origin, request.name)}</h3>
         {request.purpose && <p className="muted">{request.purpose}</p>}
       </div>
       <div className="pairing-code">
@@ -169,12 +177,10 @@ function Approval({ request, profiles, action, error }) {
       {limits ? (
         <div className="field-grid">
           <SelectField label="For" value={minutes} onChange={setMinutes}>
-            {[15, 30, 60].map((v) =>
-              option(String(v), v === 60 ? "1 hour" : `${v} minutes`),
-            )}
+            {sessionMinutes.map(([v, label]) => option(String(v), label))}
           </SelectField>
           <SelectField label="Up to" value={requests} onChange={setRequests}>
-            {[5, 20, 100].map((v) => option(String(v), `${v} requests`))}
+            {sessionRequests.map((v) => option(String(v), `${v} requests`))}
           </SelectField>
         </div>
       ) : (
@@ -465,11 +471,11 @@ export function App() {
             {state.grants.map((grant) => (
               <Row
                 key={grant.id}
-                title={siteName(grant.origin)}
+                title={appName(grant.origin, grant.name)}
                 detail={
                   <span className="tabular">
                     {providerNames[grant.provider] || grant.provider} ·{" "}
-                    {grant.remaining} left · until {clock(grant.expiresAt)}
+                    {grant.remaining} left · until {until(grant.expiresAt)}
                   </span>
                 }
               >

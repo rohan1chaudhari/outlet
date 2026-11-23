@@ -10,7 +10,7 @@ export class AIConnectionError extends Error {
 async function call(path, { token, body, signal, method = "POST" } = {}) {
   let response;
   const deadline = AbortSignal.timeout(
-    path === "/v1/generate" ? 135000 : 60000,
+    path === "/v1/generate" ? 315000 : 60000,
   );
   const combined = signal ? AbortSignal.any([signal, deadline]) : deadline;
   try {

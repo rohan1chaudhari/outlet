@@ -1,7 +1,13 @@
 import { EventEmitter } from "node:events";
 import { randomBytes, createHash, randomInt } from "node:crypto";
 import { fail, publicError } from "./errors.mjs";
-import { pairingInput, validateOutput } from "./validation.mjs";
+import {
+  pairingInput,
+  validateOutput,
+  GENERATION_TIMEOUT_MS,
+  SESSION_MINUTES,
+  SESSION_REQUESTS,
+} from "./validation.mjs";
 import { RequestHistory } from "./history.mjs";
 
 const hash = (value) => createHash("sha256").update(value).digest("base64url");
@@ -97,7 +103,10 @@ export class ConnectorController extends EventEmitter {
         "unsupported_capability",
         "This connection cannot provide everything the app requires.",
       );
-    if (![15, 30, 60].includes(minutes) || ![5, 20, 100].includes(requests))
+    if (
+      !SESSION_MINUTES.includes(minutes) ||
+      !SESSION_REQUESTS.includes(requests)
+    )
       fail("invalid_request", "Choose one of the available session limits.");
     const grant = {
       id: randomBytes(16).toString("hex"),
@@ -239,7 +248,7 @@ export class ConnectorController extends EventEmitter {
     if (signal?.aborted) controller.abort();
     const timeout = setTimeout(
       stop,
-      Math.min(120000, Math.max(1, grant.expiresAt - this.now())),
+      Math.min(GENERATION_TIMEOUT_MS, Math.max(1, grant.expiresAt - this.now())),
     );
     this.changed();
     emit("started", {

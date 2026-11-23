@@ -4,6 +4,18 @@ import { fail } from "./errors.mjs";
 export const PROTOCOL_VERSION = 1;
 export const CAPABILITIES = ["text", "image", "structuredOutput", "streaming"];
 export const DEFAULT_PORT = 4360;
+// Limits shared by the HTTP server, the controller and the desktop dialog.
+// Long inputs (a full podcast transcript) and slow models need room; the
+// HTTP body limit (6 MiB) still bounds everything a request can carry.
+export const MAX_MESSAGE_CHARS = 600000;
+export const GENERATION_TIMEOUT_MS = 300000;
+export const SESSION_MINUTES = [15, 30, 60, 1440, 10080];
+export const SESSION_REQUESTS = [5, 20, 100, 1000];
+// Chrome gives every extension a fixed 32-letter ID (letters a to p) and
+// sends it as the Origin of the extension's own requests. There is no host
+// to show, so the desktop dialog names it as an extension.
+const EXTENSION_ORIGIN = /^chrome-extension:\/\/[a-p]{32}$/;
+export const isExtensionOrigin = (value) => EXTENSION_ORIGIN.test(value);
 const ajv = new Ajv({
   strict: false,
   allErrors: false,
@@ -13,6 +25,7 @@ const ajv = new Ajv({
 export function originOf(value) {
   if (typeof value !== "string" || value.length > 512)
     fail("invalid_origin", "A valid app origin is required.", 403);
+  if (isExtensionOrigin(value)) return value;
   let url;
   try {
     url = new URL(value);
@@ -28,7 +41,7 @@ export function originOf(value) {
   ) {
     fail(
       "invalid_origin",
-      "Apps must use HTTPS, or HTTP on localhost for development.",
+      "Apps must use HTTPS, HTTP on localhost for development, or be a Chrome extension.",
       403,
     );
   }
@@ -170,8 +183,11 @@ export function generationInput(body) {
     chars += message.content.length;
     return { role: message.role, content: message.content };
   });
-  if (chars < 1 || chars > 100000)
-    fail("invalid_request", "Message text must fit within 100,000 characters.");
+  if (chars < 1 || chars > MAX_MESSAGE_CHARS)
+    fail(
+      "invalid_request",
+      `Message text must fit within ${MAX_MESSAGE_CHARS.toLocaleString("en-US")} characters.`,
+    );
   const attachments = body.attachments || [];
   if (!Array.isArray(attachments) || attachments.length > 3)
     fail("invalid_request", "Attach up to three images.");

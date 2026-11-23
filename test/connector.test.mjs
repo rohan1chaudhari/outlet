@@ -352,3 +352,39 @@ test("SSE handles byte-split UTF-8, CRLF, and multiple data lines", async () => 
   assert.equal(JSON.parse(events[0].data).text, "café");
   assert.equal(events[1].event, "completed");
 });
+test("Chrome extensions connect by their extension origin; other extension-like origins do not", () => {
+  const id = "abcdefghijklmnopabcdefghijklmnop";
+  assert.equal(originOf(`chrome-extension://${id}`), `chrome-extension://${id}`);
+  for (const value of [
+    `chrome-extension://${id}/`,
+    `chrome-extension://${id}x`,
+    "chrome-extension://ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP",
+    "chrome-extension://qrstuvwxyzqrstuvwxyzqrstuvwxyzqr",
+    `moz-extension://${id}`,
+  ])
+    assert.throws(() => originOf(value), { code: "invalid_origin" });
+});
+test("long transcripts fit; the text limit still holds", () => {
+  const ask = (chars) =>
+    generationInput({
+      requestId: "transcript-1",
+      messages: [{ role: "user", content: "x".repeat(chars) }],
+    });
+  assert.equal(ask(600000).messages[0].content.length, 600000);
+  assert.throws(() => ask(600001), { code: "invalid_request" });
+});
+test("a 7-day, 1,000-request session can be approved; other lengths cannot", (t) => {
+  const { c, pair, advance } = setup(t);
+  const ext = "chrome-extension://abcdefghijklmnopabcdefghijklmnop";
+  const p = pair(ext);
+  c.approve(p.pairingId, "test", { minutes: 10080, requests: 1000 });
+  const s = c.exchange(ext, { pairingId: p.pairingId, codeVerifier: p.verifier });
+  assert.equal(s.remaining, 1000);
+  advance(6 * 24 * 3600000);
+  assert.equal(c.authenticate(ext, s.token).remaining, 1000);
+  advance(2 * 24 * 3600000);
+  assert.throws(() => c.authenticate(ext, s.token), { code: "session_expired" });
+  const q = pair();
+  assert.throws(() => c.approve(q.pairingId, "test", { minutes: 45, requests: 5 }), { code: "invalid_request" });
+  assert.throws(() => c.approve(q.pairingId, "test", { minutes: 60, requests: 50 }), { code: "invalid_request" });
+});
